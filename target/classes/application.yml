@@ -1,0 +1,56 @@
+spring:
+  # 应用名称
+  application:
+    name: doordash-simulator
+    
+  # 数据源配置 - PostgreSQL
+  datasource:
+    url: jdbc:postgresql://localhost:5432/doordash_db
+    username: postgres
+    password: 820712shy
+    driver-class-name: org.postgresql.Driver
+    
+  # JPA/Hibernate 配置
+  jpa:
+    hibernate:
+      ddl-auto: update  # 开发阶段使用update，生产环境改为validate
+    show-sql: true      # 在控制台显示SQL语句
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true  # 格式化SQL语句，便于阅读
+    open-in-view: false   # 关闭OSIV（Open Session In View），避免懒加载问题
+    
+  # 文件上传配置
+  servlet:
+    multipart:
+      max-file-size: 10MB       # 单个文件最大10MB
+      max-request-size: 10MB    # 整个请求最大10MB
+
+# 服务器配置
+server:
+  port: 8080
+  servlet:
+    context-path: /api  # API路径前缀，访问时需要加 /api
+
+# JWT 配置
+jwt:
+  secret: your-secret-key-change-this-in-production-must-be-at-least-256-bits-long-for-security
+  expiration: 86400000  # Token过期时间：24小时（单位：毫秒）
+
+# Swagger/OpenAPI 配置
+springdoc:
+  api-docs:
+    path: /api-docs       # API文档JSON路径
+  swagger-ui:
+    path: /swagger-ui.html  # Swagger UI访问路径
+    enabled: true         # 启用Swagger UI
+
+# 日志配置
+logging:
+  level:
+    root: INFO                          # 根日志级别
+    com.shy-delievery: DEBUG            # 你的应用包日志级别
+    org.hibernate.SQL: DEBUG            # 显示SQL语句
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE  # 显示SQL参数
+    org.springframework.security: DEBUG  # Spring Security日志

@@ -1,0 +1,63 @@
+# ============================================
+# .dockerignore
+# 构建Docker镜像时忽略的文件和目录
+# ============================================
+
+# Maven 构建输出
+target/
+!target/*.jar
+
+# IDE 配置文件
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+
+# Git 文件
+.git/
+.gitignore
+.gitattributes
+
+# Docker 文件
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# 文档和说明
+README.md
+docs/
+*.md
+
+# 日志文件
+*.log
+logs/
+
+# 临时文件
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Node modules (如果有前端)
+node_modules/
+
+# 环境配置文件
+.env
+.env.local
+.env.*.local
+
+# 测试覆盖率报告
+coverage/
+*.lcov
+
+# 其他
+*.class
