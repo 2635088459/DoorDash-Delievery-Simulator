@@ -11,8 +11,8 @@ import org.springframework.context.annotation.Configuration;
 import java.util.List;
 
 /**
- * Swagger/OpenAPI 配置
- * 自动生成API文档
+ * Swagger/OpenAPI Configuration
+ * Automatically generates API documentation
  */
 @Configuration
 public class SwaggerConfig {
@@ -23,7 +23,7 @@ public class SwaggerConfig {
                 .info(new Info()
                         .title("DoorDash Simulator API")
                         .version("1.0.0")
-                        .description("在线订餐配送系统 REST API 文档")
+                        .description("Online Food Delivery System REST API Documentation")
                         .contact(new Contact()
                                 .name("Your Name")
                                 .email("your.email@example.com")
@@ -34,10 +34,10 @@ public class SwaggerConfig {
                 .servers(List.of(
                         new Server()
                                 .url("http://localhost:8080")
-                                .description("本地开发服务器"),
+                                .description("Local Development Server"),
                         new Server()
                                 .url("http://localhost:8080/api")
-                                .description("本地开发服务器（带API前缀）")
+                                .description("Local Development Server (with API prefix)")
                 ));
     }
 

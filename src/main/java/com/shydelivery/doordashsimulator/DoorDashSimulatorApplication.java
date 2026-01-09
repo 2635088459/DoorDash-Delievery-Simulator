@@ -4,12 +4,12 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * DoorDash Simulator 主应用启动类
+ * DoorDash Simulator Main Application Entry Point
  * 
- * @SpringBootApplication 注解包含：
- * - @Configuration: 标记为配置类
- * - @EnableAutoConfiguration: 启用自动配置
- * - @ComponentScan: 自动扫描组件
+ * @SpringBootApplication annotation includes:
+ * - @Configuration: Marks this as a configuration class
+ * - @EnableAutoConfiguration: Enables auto-configuration
+ * - @ComponentScan: Automatically scans for components
  */
 @SpringBootApplication
 public class DoorDashSimulatorApplication {

@@ -5,8 +5,8 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
- * CORS 跨域配置
- * 允许前端从不同域名访问API
+ * CORS Configuration
+ * Allows frontend from different domains to access the API
  */
 @Configuration
 public class CorsConfig implements WebMvcConfigurer {
@@ -14,19 +14,19 @@ public class CorsConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                // 允许的源（开发环境）
+                // Allowed origins (development environment)
                 .allowedOrigins(
-                        "http://localhost:3000",  // React 默认端口
-                        "http://localhost:4200",  // Angular 默认端口
-                        "http://localhost:8081"   // 其他前端端口
+                        "http://localhost:3000",  // React default port
+                        "http://localhost:4200",  // Angular default port
+                        "http://localhost:8081"   // Other frontend ports
                 )
-                // 允许的HTTP方法
+                // Allowed HTTP methods
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
-                // 允许的请求头
+                // Allowed request headers
                 .allowedHeaders("*")
-                // 允许携带认证信息（cookies等）
+                // Allow credentials (cookies, etc.)
                 .allowCredentials(true)
-                // 预检请求的缓存时间（秒）
+                // Preflight request cache time (seconds)
                 .maxAge(3600);
     }
 

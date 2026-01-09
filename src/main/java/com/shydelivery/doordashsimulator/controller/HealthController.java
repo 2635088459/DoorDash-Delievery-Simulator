@@ -9,16 +9,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 健康检查控制器
- * 用于测试应用是否正常运行
+ * Health Check Controller
+ * Used to test if the application is running properly
  */
 @RestController
 @RequestMapping("/health")
 public class HealthController {
 
     /**
-     * 健康检查端点
-     * 访问: http://localhost:8080/api/health
+     * Health check endpoint
+     * Access: http://localhost:8080/api/health
      */
     @GetMapping
     public Map<String, Object> health() {
@@ -31,8 +31,8 @@ public class HealthController {
     }
 
     /**
-     * 欢迎页面
-     * 访问: http://localhost:8080/api/health/welcome
+     * Welcome page
+     * Access: http://localhost:8080/api/health/welcome
      */
     @GetMapping("/welcome")
     public Map<String, String> welcome() {

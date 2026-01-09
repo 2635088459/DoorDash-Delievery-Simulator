@@ -1,99 +1,99 @@
-# Spring Boot 启动类和基础配置说明
+# Spring Boot Main Application Class and Configuration Guide
 
-## 已创建的文件
+## Created Files
 
-### 1. 主启动类
-**文件**: `src/main/java/com/shydelivery/doordashsimulator/DoorDashSimulatorApplication.java`
+### 1. Main Application Class
+**File**: `src/main/java/com/shydelivery/doordashsimulator/DoorDashSimulatorApplication.java`
 
-**作用**: 
-- Spring Boot 应用的入口点
-- 启动嵌入式服务器（Tomcat）
-- 初始化 Spring 容器
+**Purpose**: 
+- Entry point for Spring Boot application
+- Starts embedded server (Tomcat)
+- Initializes Spring container
 
-**包名说明**:
-- 根据你的 pom.xml: `com.shy-delievery`
-- 我使用了: `com.shydelivery.doordashsimulator`
-- 如果需要修改，确保与 pom.xml 的 `groupId` 一致
+**Package Name Notes**:
+- According to your pom.xml: `com.shy-delievery`
+- We are using: `com.shydelivery.doordashsimulator`
 
----
-
-### 2. 健康检查控制器
-**文件**: `src/main/java/com/shydelivery/doordashsimulator/controller/HealthController.java`
-
-**作用**:
-- 测试应用是否正常运行
-- 提供简单的 REST API
-
-**测试端点**:
-- `GET /api/health` - 健康检查
-- `GET /api/health/welcome` - 欢迎页面
 
 ---
 
-### 3. CORS 跨域配置
-**文件**: `src/main/java/com/shydelivery/doordashsimulator/config/CorsConfig.java`
+### 2. Health Check Controller
+**File**: `src/main/java/com/shydelivery/doordashsimulator/controller/HealthController.java`
 
-**作用**:
-- 允许前端跨域访问 API
-- 配置允许的域名、方法、请求头
+**Purpose**:
+- Test if the application is running properly
+- Provide simple REST API
+
+**Test Endpoints**:
+- `GET /api/health` - Health check
+- `GET /api/health/welcome` - Welcome page
 
 ---
 
-### 4. Swagger API 文档配置
-**文件**: `src/main/java/com/shydelivery/doordashsimulator/config/SwaggerConfig.java`
+### 3. CORS Configuration
+**File**: `src/main/java/com/shydelivery/doordashsimulator/config/CorsConfig.java`
 
-**作用**:
-- 自动生成 API 文档
-- 提供交互式 API 测试界面
+**Purpose**:
+- Allow frontend to access API from different origins
+- Configure allowed domains, methods, and headers
 
-**访问地址**:
+---
+
+### 4. Swagger API Documentation Configuration
+**File**: `src/main/java/com/shydelivery/doordashsimulator/config/SwaggerConfig.java`
+
+**Purpose**:
+- Auto-generate API documentation
+- Provide interactive API testing interface
+
+**Access URL**:
 - http://localhost:8080/api/swagger-ui.html
 
 ---
 
-### 5. Spring Security 配置
-**文件**: `src/main/java/com/shydelivery/doordashsimulator/config/SecurityConfig.java`
+### 5. Spring Security Configuration
+**File**: `src/main/java/com/shydelivery/doordashsimulator/config/SecurityConfig.java`
 
-**作用**:
-- 暂时禁用认证（便于开发测试）
-- 后续可以添加 JWT 认证
+**Purpose**:
+- Temporarily disable authentication (for development and testing)
+- JWT authentication can be added later
 
 ---
 
-## 🚀 现在可以启动应用了！
 
-### 方法1: 使用 Docker（推荐）
+
+### Method 1: Using Docker (Recommended)
 
 ```bash
-# 在项目根目录
+# In the project root directory
 docker-compose up -d
 
-# 查看日志
+# View logs
 docker-compose logs -f app
 ```
 
-### 方法2: 本地运行（需要先安装 PostgreSQL）
+### Method 2: Run Locally (Requires PostgreSQL installation first)
 
 ```bash
-# 使用 Maven
+# Using Maven
 mvn spring-boot:run
 
-# 或者先打包再运行
+# Or package and run
 mvn clean package
 java -jar target/doordash-simulator-1.0.0.jar
 ```
 
 ---
 
-## 📍 测试应用
+## 📍 Test the Application
 
-### 1. 健康检查
+### 1. Health Check
 
 ```bash
 curl http://localhost:8080/api/health
 ```
 
-应该返回：
+Should return:
 ```json
 {
   "status": "UP",
@@ -103,13 +103,13 @@ curl http://localhost:8080/api/health
 }
 ```
 
-### 2. 访问 Swagger UI
+### 2. Access Swagger UI
 
-浏览器打开: http://localhost:8080/api/swagger-ui.html
+Open in browser: http://localhost:8080/api/swagger-ui.html
 
 ---
 
-## 📂 当前项目结构
+## 📂 Current Project Structure
 
 ```
 DoorDash/
@@ -119,13 +119,15 @@ DoorDash/
 │       │   └── com/
 │       │       └── shydelivery/
 │       │           └── doordashsimulator/
-│       │               ├── DoorDashSimulatorApplication.java  ← 启动类
+│       │               ├── DoorDashSimulatorApplication.java  ← Main Class
 │       │               ├── config/
 │       │               │   ├── CorsConfig.java
 │       │               │   ├── SecurityConfig.java
 │       │               │   └── SwaggerConfig.java
-│       │               └── controller/
-│       │                   └── HealthController.java
+│       │               ├── controller/
+│       │               │   └── HealthController.java
+│       │               └── entity/
+│       │                   └── User.java
 │       └── resources/
 │           └── application.yml
 ├── Dockerfile
@@ -135,28 +137,30 @@ DoorDash/
 └── docs/
     ├── 01-project-initialization.md
     ├── 02-postgresql-config.md
-    └── 03-docker-guide.md
+    ├── 03-docker-guide.md
+    ├── 04-application-setup.md
+    ├── 05-development-roadmap.md
+    └── 06-database-schema.md
 ```
 
 ---
 
-## ⚠️ 可能需要修改的地方
 
-### 包名不一致
+### Package Name Inconsistency
 
-如果启动报错，检查包名：
+If startup fails, check the package names:
 
-1. **pom.xml** 中的 `groupId`:
+1. **pom.xml** `groupId`:
    ```xml
    <groupId>com.shy-delievery</groupId>
    ```
 
-2. **Java 文件**的包名应该匹配:
+2. **Java files** package names should match:
    ```java
    package com.shydelivery.doordashsimulator;
    ```
 
-3. **application.yml** 中的日志配置:
+3. **application.yml** logging configuration:
    ```yaml
    logging:
      level:
@@ -165,14 +169,4 @@ DoorDash/
 
 ---
 
-## 🎯 下一步
 
-现在你的项目已经可以启动了！接下来可以：
-
-1. ✅ 测试应用启动
-2. ✅ 访问 Swagger 查看 API 文档
-3. ⏭️ 开始创建实体类（Entity）
-4. ⏭️ 创建 Repository
-5. ⏭️ 实现业务逻辑
-
-准备好开始开发实际功能了吗？

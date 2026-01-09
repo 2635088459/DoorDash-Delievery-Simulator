@@ -1,20 +1,19 @@
-# PostgreSQL 配置说明
+# PostgreSQL Setting Guide for DoorDash Clone Project
 
-## 为什么选择 PostgreSQL
+## Why Choose PostgreSQL
 
-✅ **更强大的数据类型** - JSON、数组、UUID等  
-✅ **更好的并发控制** - MVCC机制成熟  
-✅ **地理位置功能** - PostGIS扩展（外卖项目可能用到）  
-✅ **更严格的SQL标准** - 学习更规范的SQL  
-✅ **企业级特性** - 适合未来扩展  
+✅ **More Powerful Data Types** - JSON, arrays, UUID, etc.  
+✅ **Better Concurrency Control** - Mature MVCC mechanism  
+✅ **Geospatial Features** - PostGIS extension (useful for delivery projects)  
+✅ **Stricter SQL Standards** - Learn more standardized SQL  
+✅ **Enterprise Features** - Suitable for future expansion  
 
 ---
 
-## application.yml 配置
+## application.yml Configuration
+**Location**: `src/main/resources/application.yml`
 
-**位置**: `src/main/resources/application.yml`
-
-### PostgreSQL 数据源配置
+### PostgreSQL Data Source Configuration
 
 ```yaml
 spring:
@@ -35,67 +34,51 @@ spring:
     open-in-view: false
 ```
 
-### 与 MySQL 的主要区别
+## Create Database
 
-| 配置项 | PostgreSQL | MySQL |
-|--------|------------|-------|
-| URL | `jdbc:postgresql://localhost:5432/` | `jdbc:mysql://localhost:3306/` |
-| Driver | `org.postgresql.Driver` | `com.mysql.cj.jdbc.Driver` |
-| Dialect | `PostgreSQLDialect` | `MySQL8Dialect` |
-| 默认端口 | 5432 | 3306 |
-| 默认用户 | postgres | root |
-
----
-
-## 创建数据库
-
-### 方法1: 使用 psql 命令行
-
+### Method 1: Using psql Command Line
 ```sql
--- 连接到PostgreSQL
+-- Connect to PostgreSQL
 psql -U postgres
 
--- 创建数据库
+-- Create database
 CREATE DATABASE doordash_db;
 
--- 创建用户（可选）
+-- Create user (optional)
 CREATE USER doordash_user WITH PASSWORD 'your_password';
 
--- 授权
+-- Grant privileges
 GRANT ALL PRIVILEGES ON DATABASE doordash_db TO doordash_user;
 ```
 
-### 方法2: 使用 pgAdmin
-
-1. 打开 pgAdmin（PostgreSQL图形化工具）
-2. 右键 Databases → Create → Database
-3. 输入数据库名: `doordash_db`
-4. 保存
-
+### Method 2: Using pgAdmin
+1. Open pgAdmin (PostgreSQL graphical tool)
+2. Right-click Databases → Create → Database
+3. Enter database name: `doordash_db`
+4. Save
 ---
 
-## 安装 PostgreSQL
+## Install PostgreSQL
 
-### macOS (使用 Homebrew)
+### macOS (Using Homebrew)
 
 ```bash
-# 安装PostgreSQL
+# Install PostgreSQL
 brew install postgresql@16
 
-# 启动PostgreSQL服务
+# Start PostgreSQL service
 brew services start postgresql@16
 
-# 验证安装
+# Verify installation
 psql --version
 ```
 
-### 使用 Docker (推荐)
-
+### Using Docker (Recommended)
 ```bash
-# 拉取PostgreSQL镜像
+# Pull PostgreSQL image
 docker pull postgres:16
 
-# 运行PostgreSQL容器
+# Run PostgreSQL container
 docker run --name postgres-doordash \
   -e POSTGRES_PASSWORD=your_password \
   -e POSTGRES_DB=doordash_db \
@@ -103,97 +86,71 @@ docker run --name postgres-doordash \
   -d postgres:16
 ```
 
-### 使用 docker-compose (最推荐)
 
-在 `docker-compose.yml` 中配置（后续会创建）
 
----
+## PostgreSQL Advanced Data Types Examples
 
-## PostgreSQL 特有功能（外卖项目可用）
-
-### 1. **JSON/JSONB 类型**
-存储菜单、订单详情等灵活数据
+### 1. **JSON/JSONB Type**
+save menu details and order info
 
 ```java
 @Column(columnDefinition = "jsonb")
 private String menuDetails;
 ```
 
-### 2. **数组类型**
-存储标签、图片URL等
+### 2. **Array Type**
+store tags, image URLs, etc.
 
 ```java
 @Column(columnDefinition = "text[]")
 private String[] tags;
 ```
 
-### 3. **PostGIS 扩展**
-计算餐厅距离、配送范围
+### 3. **PostGIS Extension**
+calculate restaurant distance, delivery range
 
 ```sql
--- 启用PostGIS
+-- Enable PostGIS
 CREATE EXTENSION postgis;
 
--- 计算两点距离
+-- Calculate distance between two points
 SELECT ST_Distance(
   ST_MakePoint(lon1, lat1)::geography,
   ST_MakePoint(lon2, lat2)::geography
 );
 ```
 
-### 4. **全文搜索**
-搜索餐厅、菜品
+
+## Common PostgreSQL Commands
 
 ```sql
--- 创建全文搜索索引
-CREATE INDEX idx_restaurant_search 
-ON restaurants 
-USING GIN(to_tsvector('english', name || ' ' || description));
-```
-
----
-
-## 常用 PostgreSQL 命令
-
-```sql
--- 查看所有数据库
+-- List all databases
 \l
 
--- 连接到数据库
+-- Connect to a database
 \c doordash_db
 
--- 查看所有表
+-- List all tables
 \dt
 
--- 查看表结构
+-- Describe table structure
 \d table_name
 
--- 退出
+-- Exit
 \q
 ```
 
 ---
 
-## pom.xml 已配置
-
-✅ PostgreSQL驱动已启用  
-✅ MySQL驱动已注释（如需要可随时切换）
 
 ---
 
-## 下一步
-
-1. ✅ pom.xml - PostgreSQL驱动已配置
-2. ⏭️ 创建 application.yml
-3. ⏭️ 创建 Dockerfile 和 docker-compose.yml
-4. ⏭️ 启动 PostgreSQL
-5. ⏭️ 开始编写实体类
+## Next Steps
+1. ✅ pom.xml - PostgreSQL driver enabled
+2. ⏭️ Create application.yml
+3. ⏭️ Create Dockerfile and docker-compose.yml
+4. ⏭️ Start PostgreSQL
+5. ⏭️ Begin writing entity classes
 
 ---
 
-## 注意事项
-
-⚠️ **端口冲突**: 确保5432端口未被占用  
-⚠️ **密码安全**: 不要在代码中硬编码密码  
-⚠️ **字符集**: PostgreSQL默认UTF-8，无需特别配置  
-⚠️ **大小写敏感**: PostgreSQL对标识符大小写敏感（建议用小写）

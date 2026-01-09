@@ -7,13 +7,13 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.web.SecurityFilterChain;
 
 /**
- * Spring Security 基础配置
- * 暂时禁用认证，便于开发测试
+ * Spring Security Basic Configuration
+ * Temporarily disables authentication for easier development and testing
  * 
- * 后续可以添加：
- * - JWT 认证
- * - 用户登录
- * - 权限控制
+ * Can be extended later with:
+ * - JWT authentication
+ * - User login
+ * - Authorization control
  */
 @Configuration
 @EnableWebSecurity
@@ -22,9 +22,9 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // 禁用 CSRF（开发阶段，生产环境需要启用）
+                // Disable CSRF (for development, should be enabled in production)
                 .csrf(csrf -> csrf.disable())
-                // 允许所有请求（暂时不需要认证）
+                // Allow all requests (no authentication required for now)
                 .authorizeHttpRequests(auth -> auth
                         .anyRequest().permitAll()
                 );
