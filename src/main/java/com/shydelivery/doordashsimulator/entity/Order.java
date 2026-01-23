@@ -51,6 +51,14 @@ public class Order {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "delivery_address_id", nullable = false)
     private Address deliveryAddress;
+    
+    /**
+     * Driver assigned to deliver this order - Many orders can be delivered by one driver
+     * Nullable until a driver accepts the order
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "driver_id")
+    private User driver;
 
     /**
      * Human-readable order number for customer reference
@@ -120,6 +128,38 @@ public class Order {
      */
     @Column(name = "actual_delivery")
     private LocalDateTime actualDelivery;
+    
+    /**
+     * Time when driver picked up the order from restaurant
+     */
+    @Column(name = "picked_up_at")
+    private LocalDateTime pickedUpAt;
+    
+    /**
+     * Phase 2: 配送距离（公里）
+     * 从餐厅到配送地址的距离，用于动态定价
+     */
+    @Column(name = "delivery_distance_km", precision = 10, scale = 2)
+    private BigDecimal deliveryDistanceKm;
+    
+    /**
+     * Phase 2: 下单时的天气状况
+     * 用于记录是否因恶劣天气加价
+     */
+    @Column(name = "weather_condition", length = 50)
+    private String weatherCondition;
+    
+    /**
+     * Phase 2: 是否因恶劣天气加价
+     */
+    @Column(name = "bad_weather_surcharge")
+    private Boolean badWeatherSurcharge = false;
+    
+    /**
+     * Phase 2: 是否在高峰期下单
+     */
+    @Column(name = "peak_hour_surcharge")
+    private Boolean peakHourSurcharge = false;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

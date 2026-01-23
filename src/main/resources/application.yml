@@ -33,10 +33,20 @@ server:
   servlet:
     context-path: /api  # API路径前缀，访问时需要加 /api
 
-# JWT 配置
-jwt:
-  secret: your-secret-key-change-this-in-production-must-be-at-least-256-bits-long-for-security
-  expiration: 86400000  # Token过期时间：24小时（单位：毫秒）
+# AWS Cognito 配置
+aws:
+  cognito:
+    region: us-east-1
+    userPoolId: us-east-1_a6gt5CsAi
+    clientId: 7fv4l4ftq2qrioplfcrmu5a2d9
+    # JWT 验证所需配置
+    jwksUrl: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_a6gt5CsAi/.well-known/jwks.json
+    issuer: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_a6gt5CsAi
+
+# JWT 配置（不再需要，因为使用 Cognito 管理认证）
+# jwt:
+#   secret: your-secret-key-change-this-in-production-must-be-at-least-256-bits-long-for-security
+#   expiration: 86400000  # Token过期时间：24小时（单位：毫秒）
 
 # Swagger/OpenAPI 配置
 springdoc:

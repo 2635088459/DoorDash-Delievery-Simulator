@@ -1,0 +1,260 @@
+package com.shydelivery.doordashsimulator.service;
+
+import com.nimbusds.jwt.SignedJWT;
+import com.shydelivery.doordashsimulator.dto.UserDTO;
+import com.shydelivery.doordashsimulator.dto.request.LoginRequest;
+import com.shydelivery.doordashsimulator.dto.response.AuthResponse;
+import com.shydelivery.doordashsimulator.entity.User;
+import com.shydelivery.doordashsimulator.exception.BusinessException;
+import com.shydelivery.doordashsimulator.repository.UserRepository;
+import com.shydelivery.doordashsimulator.security.CognitoJwtValidator;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.*;
+
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * 认证服务
+ * 
+ * 职责：
+ * 1. 用户登录（通过 AWS Cognito）
+ * 2. Token 刷新
+ * 3. 用户登出
+ * 4. 获取当前用户信息
+ */
+@Service
+@Slf4j
+public class AuthService {
+    
+    @Autowired
+    private CognitoIdentityProviderClient cognitoClient;
+    
+    @Autowired
+    private UserRepository userRepository;
+    
+    @Autowired
+    private CognitoJwtValidator jwtValidator;
+    
+    @Value("${aws.cognito.userPoolId}")
+    private String userPoolId;
+    
+    @Value("${aws.cognito.clientId}")
+    private String clientId;
+    
+    /**
+     * 用户登录
+     * 
+     * @param request 登录请求（邮箱 + 密码）
+     * @return 认证响应（包含 Tokens 和用户信息）
+     */
+    public AuthResponse login(LoginRequest request) {
+        try {
+            log.info("User login attempt: {}", request.getEmail());
+            
+            // 1. 准备认证参数
+            Map<String, String> authParams = new HashMap<>();
+            authParams.put("USERNAME", request.getEmail());
+            authParams.put("PASSWORD", request.getPassword());
+            
+            // 2. 调用 AWS Cognito InitiateAuth API
+            InitiateAuthRequest authRequest = InitiateAuthRequest.builder()
+                    .authFlow(AuthFlowType.USER_PASSWORD_AUTH)
+                    .clientId(clientId)
+                    .authParameters(authParams)
+                    .build();
+            
+            InitiateAuthResponse authResponse = cognitoClient.initiateAuth(authRequest);
+            
+            // 3. 获取认证结果中的 Tokens
+            AuthenticationResultType authResult = authResponse.authenticationResult();
+            
+            if (authResult == null) {
+                log.error("Authentication result is null for user: {}", request.getEmail());
+                throw new BusinessException("登录失败：认证结果为空");
+            }
+            
+            String idToken = authResult.idToken();
+            // String accessToken = authResult.accessToken();  // 不使用 Access Token，因为它不包含用户属性
+            String refreshToken = authResult.refreshToken();
+            Integer expiresIn = authResult.expiresIn();
+            
+            // 4. 验证并解析 IdToken
+            SignedJWT signedJWT = jwtValidator.validateToken(idToken);
+            String cognitoSub = jwtValidator.extractCognitoSub(signedJWT);
+            
+            log.info("User authenticated successfully: {}, cognitoSub: {}", request.getEmail(), cognitoSub);
+            
+            // 5. 从数据库获取用户信息
+            User user = userRepository.findByCognitoSub(cognitoSub)
+                    .orElseThrow(() -> new BusinessException("用户不存在，请先注册"));
+            
+            // 6. 检查用户状态
+            if (!user.getIsActive()) {
+                log.warn("Inactive user attempted to login: {}", user.getEmail());
+                throw new BusinessException("用户账户已被禁用，请联系管理员");
+            }
+            
+            // 7. 构建用户 DTO
+            UserDTO userDTO = convertToDTO(user);
+            
+            // 8. 构建并返回认证响应
+            // 注意: 将 ID Token 作为 accessToken 返回，因为它包含完整的用户信息
+            // ID Token 包含 email 和 custom:role，而 Access Token 只包含 username
+            return AuthResponse.builder()
+                    .idToken(idToken)
+                    .accessToken(idToken)  // 使用 idToken 代替 accessToken，确保包含用户属性
+                    .refreshToken(refreshToken)
+                    .expiresIn(expiresIn)
+                    .tokenType("Bearer")
+                    .user(userDTO)
+                    .build();
+            
+        } catch (NotAuthorizedException e) {
+            log.error("Invalid credentials for user: {}", request.getEmail());
+            throw new BusinessException("邮箱或密码错误");
+        } catch (UserNotFoundException e) {
+            log.error("User not found in Cognito: {}", request.getEmail());
+            throw new BusinessException("用户不存在，请先注册");
+        } catch (Exception e) {
+            log.error("Login failed for user {}: {}", request.getEmail(), e.getMessage(), e);
+            throw new BusinessException("登录失败: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 刷新 Token
+     * 
+     * @param refreshToken Refresh Token
+     * @return 新的认证响应（包含新的 IdToken 和 AccessToken）
+     */
+    public AuthResponse refreshToken(String refreshToken) {
+        try {
+            log.info("Refreshing token...");
+            
+            // 1. 准备刷新参数
+            Map<String, String> authParams = new HashMap<>();
+            authParams.put("REFRESH_TOKEN", refreshToken);
+            
+            // 2. 调用 AWS Cognito InitiateAuth API（使用 REFRESH_TOKEN_AUTH）
+            InitiateAuthRequest authRequest = InitiateAuthRequest.builder()
+                    .authFlow(AuthFlowType.REFRESH_TOKEN_AUTH)
+                    .clientId(clientId)
+                    .authParameters(authParams)
+                    .build();
+            
+            InitiateAuthResponse authResponse = cognitoClient.initiateAuth(authRequest);
+            
+            // 3. 获取新的 Tokens
+            AuthenticationResultType authResult = authResponse.authenticationResult();
+            String newIdToken = authResult.idToken();
+            String newAccessToken = authResult.accessToken();
+            Integer expiresIn = authResult.expiresIn();
+            
+            // 注意：刷新时不会返回新的 refreshToken，使用原来的
+            
+            // 4. 从新的 IdToken 中提取用户信息
+            SignedJWT signedJWT = jwtValidator.validateToken(newIdToken);
+            String cognitoSub = jwtValidator.extractCognitoSub(signedJWT);
+            
+            // 5. 从数据库获取用户信息
+            User user = userRepository.findByCognitoSub(cognitoSub)
+                    .orElseThrow(() -> new BusinessException("用户不存在"));
+            
+            UserDTO userDTO = convertToDTO(user);
+            
+            log.info("Token refreshed successfully for user: {}", user.getEmail());
+            
+            // 6. 返回响应
+            return AuthResponse.builder()
+                    .idToken(newIdToken)
+                    .accessToken(newAccessToken)
+                    .refreshToken(refreshToken)  // 返回原来的 refreshToken
+                    .expiresIn(expiresIn)
+                    .tokenType("Bearer")
+                    .user(userDTO)
+                    .build();
+            
+        } catch (NotAuthorizedException e) {
+            log.error("Invalid or expired refresh token");
+            throw new BusinessException("刷新 Token 已过期，请重新登录");
+        } catch (Exception e) {
+            log.error("Token refresh failed: {}", e.getMessage(), e);
+            throw new BusinessException("刷新 Token 失败: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 全局登出
+     * 
+     * @param accessToken Access Token
+     */
+    public void logout(String accessToken) {
+        try {
+            log.info("User logout attempt");
+            
+            // 调用 AWS Cognito GlobalSignOut API
+            GlobalSignOutRequest signOutRequest = GlobalSignOutRequest.builder()
+                    .accessToken(accessToken)
+                    .build();
+            
+            cognitoClient.globalSignOut(signOutRequest);
+            
+            log.info("User logged out successfully");
+            
+        } catch (NotAuthorizedException e) {
+            log.error("Invalid access token for logout");
+            throw new BusinessException("登出失败：无效的 Token");
+        } catch (Exception e) {
+            log.error("Logout failed: {}", e.getMessage(), e);
+            throw new BusinessException("登出失败: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 根据 Cognito Sub 获取用户信息
+     * 
+     * @param cognitoSub Cognito User Sub
+     * @return 用户 DTO
+     */
+    public UserDTO getUserByCognitoSub(String cognitoSub) {
+        User user = userRepository.findByCognitoSub(cognitoSub)
+                .orElseThrow(() -> new BusinessException("用户不存在"));
+        
+        return convertToDTO(user);
+    }
+    
+    /**
+     * 根据邮箱获取用户信息
+     * 
+     * @param email 用户邮箱
+     * @return 用户 DTO
+     */
+    public UserDTO getUserByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BusinessException("用户不存在"));
+        
+        return convertToDTO(user);
+    }
+    
+    /**
+     * 将 User 实体转换为 UserDTO
+     */
+    private UserDTO convertToDTO(User user) {
+        UserDTO dto = new UserDTO();
+        dto.setId(user.getId());
+        dto.setEmail(user.getEmail());
+        dto.setFirstName(user.getFirstName());
+        dto.setLastName(user.getLastName());
+        dto.setPhoneNumber(user.getPhoneNumber());
+        dto.setRole(user.getRole());
+        dto.setIsActive(user.getIsActive());
+        dto.setCreatedAt(user.getCreatedAt());
+        dto.setUpdatedAt(user.getUpdatedAt());
+        return dto;
+    }
+}

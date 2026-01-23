@@ -31,8 +31,12 @@ public class User {
     @Column(nullable = false, unique = true, length = 255)
     private String email;
 
-    @Column(nullable = false, length = 255)
-    private String password;
+    /**
+     * AWS Cognito User Sub (unique identifier from Cognito)
+     * This links our local user to Cognito user pool
+     */
+    @Column(name = "cognito_sub", unique = true, length = 255)
+    private String cognitoSub;
 
     @Column(name = "first_name", nullable = false, length = 100)
     private String firstName;
@@ -42,6 +46,13 @@ public class User {
 
     @Column(name = "phone_number", nullable = false, unique = true, length = 20)
     private String phoneNumber;
+
+    /**
+     * Password hash (BCrypt)
+     * Note: For AWS Cognito users, this will be null
+     */
+    @Column(name = "password_hash", length = 255)
+    private String passwordHash;
 
     /**
      * User role: CUSTOMER, RESTAURANT_OWNER, DRIVER

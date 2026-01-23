@@ -2,6 +2,7 @@ package com.shydelivery.doordashsimulator.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
     @Index(name = "idx_is_available", columnList = "is_available")
 })
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Driver {
@@ -137,5 +139,13 @@ public class Driver {
      */
     public void incrementDeliveries() {
         this.totalDeliveries++;
+    }
+
+    /**
+     * Get total earnings (temporarily return ZERO, will calculate from deliveries later)
+     */
+    public BigDecimal getTotalEarnings() {
+        // TODO: Calculate from actual delivery records
+        return BigDecimal.ZERO;
     }
 }

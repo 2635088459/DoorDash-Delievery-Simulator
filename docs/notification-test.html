@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DoorDash 实时通知测试</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7/bundles/stomp.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .status.connected {
+            background: #10b981;
+        }
+
+        .status.disconnected {
+            background: #ef4444;
+        }
+
+        .controls {
+            padding: 20px 30px;
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #374151;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-right: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #ef4444;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .notifications {
+            padding: 20px 30px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .notification-item {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            transition: all 0.3s;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .notification-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+        }
+
+        .notification-item.unread {
+            background: #eff6ff;
+            border-color: #667eea;
+        }
+
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 16px;
+        }
+
+        .notification-time {
+            color: #9ca3af;
+            font-size: 12px;
+        }
+
+        .notification-message {
+            color: #6b7280;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+
+        .notification-meta {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .notification-type,
+        .notification-priority {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .notification-type {
+            background: #e0e7ff;
+            color: #4338ca;
+        }
+
+        .notification-priority.HIGH {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .notification-priority.URGENT {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .notification-priority.NORMAL {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #9ca3af;
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔔 DoorDash 实时通知系统</h1>
+            <div class="status" id="connectionStatus">未连接</div>
+            <div id="unreadBadge" style="display: none;">
+                <span class="badge" id="unreadCount">0</span> 条未读通知
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="userEmail">用户邮箱 (用于订阅通知):</label>
+                <input type="text" id="userEmail" value="customer@example.com" placeholder="输入用户邮箱">
+            </div>
+            <button id="connectBtn" onclick="connect()">连接 WebSocket</button>
+            <button id="disconnectBtn" onclick="disconnect()" disabled>断开连接</button>
+            <button onclick="clearNotifications()">清空通知</button>
+        </div>
+
+        <div class="notifications" id="notificationsList">
+            <div class="empty-state">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+                <h3>暂无通知</h3>
+                <p>连接 WebSocket 后将实时接收通知</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let stompClient = null;
+        let notifications = [];
+
+        function connect() {
+            const userEmail = document.getElementById('userEmail').value;
+            if (!userEmail) {
+                alert('请输入用户邮箱');
+                return;
+            }
+
+            const socket = new SockJS('http://localhost:8080/ws');
+            stompClient = Stomp.Stomp.over(socket);
+
+            stompClient.connect({}, function(frame) {
+                console.log('WebSocket 已连接:', frame);
+                updateStatus('connected', '已连接');
+
+                // 订阅用户通知频道
+                stompClient.subscribe(`/topic/notifications/${userEmail}`, function(message) {
+                    const notification = JSON.parse(message.body);
+                    console.log('收到新通知:', notification);
+                    addNotification(notification);
+                });
+
+                document.getElementById('connectBtn').disabled = true;
+                document.getElementById('disconnectBtn').disabled = false;
+            }, function(error) {
+                console.error('WebSocket 连接失败:', error);
+                updateStatus('disconnected', '连接失败');
+            });
+        }
+
+        function disconnect() {
+            if (stompClient !== null) {
+                stompClient.disconnect();
+            }
+            updateStatus('disconnected', '未连接');
+            document.getElementById('connectBtn').disabled = false;
+            document.getElementById('disconnectBtn').disabled = true;
+        }
+
+        function updateStatus(status, text) {
+            const statusEl = document.getElementById('connectionStatus');
+            statusEl.className = `status ${status}`;
+            statusEl.textContent = text;
+        }
+
+        function addNotification(notification) {
+            notifications.unshift(notification);
+            renderNotifications();
+            updateUnreadCount();
+
+            // 浏览器通知
+            if (Notification.permission === "granted") {
+                new Notification(notification.title, {
+                    body: notification.message,
+                    icon: '/icon.png'
+                });
+            } else if (Notification.permission !== "denied") {
+                Notification.requestPermission().then(function(permission) {
+                    if (permission === "granted") {
+                        new Notification(notification.title, {
+                            body: notification.message
+                        });
+                    }
+                });
+            }
+        }
+
+        function renderNotifications() {
+            const container = document.getElementById('notificationsList');
+            
+            if (notifications.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+                        <h3>暂无通知</h3>
+                        <p>等待实时通知推送...</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = notifications.map(notif => `
+                <div class="notification-item ${notif.isRead ? '' : 'unread'}">
+                    <div class="notification-header">
+                        <div class="notification-title">${notif.title}</div>
+                        <div class="notification-time">${notif.timeAgo || '刚刚'}</div>
+                    </div>
+                    <div class="notification-message">${notif.message}</div>
+                    <div class="notification-meta">
+                        <span class="notification-type">${notif.type}</span>
+                        <span class="notification-priority ${notif.priority}">${notif.priority}</span>
+                        ${notif.orderId ? `<span class="notification-type">订单 #${notif.orderId}</span>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateUnreadCount() {
+            const unreadCount = notifications.filter(n => !n.isRead).length;
+            const badge = document.getElementById('unreadBadge');
+            const count = document.getElementById('unreadCount');
+            
+            if (unreadCount > 0) {
+                badge.style.display = 'block';
+                count.textContent = unreadCount;
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        function clearNotifications() {
+            notifications = [];
+            renderNotifications();
+            updateUnreadCount();
+        }
+
+        // 请求浏览器通知权限
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+    </script>
+</body>
+</html>
