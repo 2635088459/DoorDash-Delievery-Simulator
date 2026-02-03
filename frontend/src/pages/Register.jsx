@@ -19,6 +19,12 @@ const Register = () => {
     role: 'CUSTOMER',
   });
   const [loading, setLoading] = useState(false);
+  
+  const roleOptions = [
+    { value: 'CUSTOMER', label: '👤 普通客户', description: '浏览餐厅，下单订餐' },
+    { value: 'RESTAURANT_OWNER', label: '🏪 餐厅老板', description: '管理餐厅，处理订单' },
+    { value: 'DRIVER', label: '🚗 配送骑手', description: '接单配送，赚取收入' }
+  ];
 
   const handleChange = (e) => {
     setFormData({
@@ -40,9 +46,18 @@ const Register = () => {
     try {
       const { confirmPassword, ...registerData } = formData;
       const response = await authService.register(registerData);
-      login(response.user, response.accessToken);  // 使用 accessToken 而不是 token
-      toast.success('注册成功！');
-      navigate('/');
+      login(response.user, response.accessToken);
+      
+      toast.success(`注册成功！欢迎加入 DoorDash`);
+      
+      // 根据角色跳转到不同页面
+      if (response.user.role === 'RESTAURANT_OWNER') {
+        navigate('/restaurant-home');
+      } else if (response.user.role === 'DRIVER') {
+        navigate('/driver-home');
+      } else {
+        navigate('/');
+      }
     } catch (error) {
       console.error('Register error:', error);
       toast.error(error.response?.data?.message || '注册失败，请稍后重试');
@@ -134,6 +149,42 @@ const Register = () => {
                 value={formData.phone}
                 onChange={handleChange}
               />
+            </div>
+
+            {/* 角色选择 */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                选择账户类型
+              </label>
+              <div className="space-y-3">
+                {roleOptions.map((option) => (
+                  <label
+                    key={option.value}
+                    className={`flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                      formData.role === option.value
+                        ? 'border-primary-500 bg-primary-50'
+                        : 'border-gray-200 hover:border-primary-300'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="role"
+                      value={option.value}
+                      checked={formData.role === option.value}
+                      onChange={handleChange}
+                      className="mt-1 h-4 w-4 text-primary-600 focus:ring-primary-500"
+                    />
+                    <div className="ml-3 flex-1">
+                      <div className="text-sm font-medium text-gray-900">
+                        {option.label}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        {option.description}
+                      </div>
+                    </div>
+                  </label>
+                ))}
+              </div>
             </div>
 
             <div>

@@ -79,7 +79,7 @@ public class Cart {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
-
+   
     /**
      * 添加商品到购物车
      */

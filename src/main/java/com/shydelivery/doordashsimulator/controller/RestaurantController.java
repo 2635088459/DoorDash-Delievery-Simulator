@@ -102,6 +102,30 @@ public class RestaurantController {
     }
     
     /**
+     * 获取当前老板的第一个餐厅（用于餐厅管理页面）
+     * 🔒 权限要求：RESTAURANT_OWNER 角色
+     * 
+     * @param principal 当前登录用户
+     * @return 用户拥有的第一个餐厅
+     */
+    @PreAuthorize("hasRole('RESTAURANT_OWNER')")
+    @GetMapping("/owner")
+    public ResponseEntity<RestaurantDTO> getOwnerRestaurant(Principal principal) {
+        String ownerEmail = principal.getName();
+        log.info("🏪 获取餐厅老板的餐厅: owner={}", ownerEmail);
+        
+        List<RestaurantDTO> restaurants = restaurantService.getMyRestaurants(ownerEmail);
+        if (restaurants.isEmpty()) {
+            throw new com.shydelivery.doordashsimulator.exception.ResourceNotFoundException(
+                "您还没有创建餐厅，请先创建餐厅"
+            );
+        }
+        
+        // 返回第一个餐厅（目前系统一个老板只管理一个餐厅）
+        return ResponseEntity.ok(restaurants.get(0));
+    }
+    
+    /**
      * 更新餐厅信息
      * 🔒 权限要求：RESTAURANT_OWNER 角色 + 所有者验证
      * 

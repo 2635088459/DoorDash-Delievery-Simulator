@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ShoppingBag, Package, Loader } from 'lucide-react';
 import { orderService } from '../services/apiService';
 import toast from 'react-hot-toast';
 
 const Orders = () => {
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -84,6 +86,7 @@ const Orders = () => {
               {orders.map((order) => (
             <div
               key={order.id}
+              onClick={() => navigate(`/orders/${order.id}`)}
               className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer"
             >
               <div className="flex items-start justify-between mb-4">
@@ -102,24 +105,37 @@ const Orders = () => {
 
               <div className="flex items-center justify-between text-sm">
                 <div className="text-gray-600">
-                  {order.items} 件商品
+                  {order.items?.length || 0} 件商品
                 </div>
                 <div className="flex items-center space-x-4">
                   <span className="text-gray-600">
                     {new Date(order.createdAt).toLocaleString('zh-CN')}
                   </span>
                   <span className="text-lg font-bold text-primary-600">
-                    ¥{order.totalAmount.toFixed(2)}
+                    ¥{order.totalAmount?.toFixed(2) || '0.00'}
                   </span>
                 </div>
               </div>
 
               <div className="mt-4 pt-4 border-t border-gray-200 flex items-center justify-end space-x-2">
-                <button className="btn btn-outline text-sm">
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/orders/${order.id}`);
+                  }}
+                  className="btn btn-outline text-sm"
+                >
                   查看详情
                 </button>
                 {order.status === 'PENDING' && (
-                  <button className="btn btn-secondary text-sm">
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // TODO: 实现取消订单功能
+                      toast.error('取消订单功能开发中');
+                    }}
+                    className="btn btn-secondary text-sm"
+                  >
                     取消订单
                   </button>
                 )}

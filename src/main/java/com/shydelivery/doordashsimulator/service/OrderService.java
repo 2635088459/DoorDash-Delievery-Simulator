@@ -394,6 +394,10 @@ public class OrderService {
         Order updated = orderRepository.save(order);
         log.info("订单状态更新成功: orderId={}, status={}", orderId, updated.getStatus());
         
+        // 发送订单状态变更通知
+        String notificationMessage = generateStatusChangeMessage(updated);
+        notificationService.notifyOrderStatusChange(updated, notificationMessage);
+        
         return convertToDTO(updated);
     }
     
@@ -426,6 +430,57 @@ public class OrderService {
         log.info("订单取消成功: orderId={}", orderId);
         
         return convertToDTO(cancelled);
+    }
+    
+    /**
+     * 生成订单状态变更消息
+     */
+    private String generateStatusChangeMessage(Order order) {
+        String restaurantName = order.getRestaurant().getName();
+        String orderNumber = order.getOrderNumber();
+        
+        switch (order.getStatus()) {
+            case CONFIRMED:
+                return String.format(
+                    "您的订单 %s 已被餐厅 %s 确认，正在准备中。",
+                    orderNumber, restaurantName
+                );
+            case PREPARING:
+                return String.format(
+                    "餐厅 %s 正在制作您的订单 %s，请稍候。",
+                    restaurantName, orderNumber
+                );
+            case READY_FOR_PICKUP:
+                return String.format(
+                    "您的订单 %s 已准备完成，等待骑手取餐。",
+                    orderNumber
+                );
+            case PICKED_UP:
+                return String.format(
+                    "骑手已取餐，您的订单 %s 正在配送中。",
+                    orderNumber
+                );
+            case IN_TRANSIT:
+                return String.format(
+                    "您的订单 %s 正在配送途中。",
+                    orderNumber
+                );
+            case DELIVERED:
+                return String.format(
+                    "您的订单 %s 已送达，感谢您的订购！",
+                    orderNumber
+                );
+            case CANCELLED:
+                return String.format(
+                    "您的订单 %s 已取消。",
+                    orderNumber
+                );
+            default:
+                return String.format(
+                    "您的订单 %s 状态已更新为: %s",
+                    orderNumber, order.getStatus()
+                );
+        }
     }
     
     /**

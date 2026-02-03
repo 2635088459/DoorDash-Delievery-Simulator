@@ -28,9 +28,25 @@ const Login = () => {
 
     try {
       const response = await authService.login(formData.email, formData.password);
-      login(response.user, response.accessToken);  // 使用 accessToken 而不是 token
-      toast.success('登录成功！');
-      navigate('/');
+      login(response.user, response.accessToken);
+      
+      // 根据用户角色跳转到不同页面
+      const roleMessages = {
+        CUSTOMER: '登录成功！开始您的美食之旅',
+        RESTAURANT_OWNER: '登录成功！欢迎回到餐厅管理',
+        DRIVER: '登录成功！准备好接单了吗？'
+      };
+      
+      toast.success(roleMessages[response.user.role] || '登录成功！');
+      
+      // 跳转逻辑
+      if (response.user.role === 'RESTAURANT_OWNER') {
+        navigate('/restaurant-home');
+      } else if (response.user.role === 'DRIVER') {
+        navigate('/driver-home');
+      } else {
+        navigate('/');
+      }
     } catch (error) {
       console.error('Login error:', error);
       toast.error(error.response?.data?.message || '登录失败，请检查您的邮箱和密码');

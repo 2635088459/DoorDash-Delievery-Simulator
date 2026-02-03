@@ -50,7 +50,10 @@ const Navbar = () => {
       const notifications = await notificationService.getAll();
       setNotifications(notifications);
     } catch (error) {
-      console.error('Failed to load notifications:', error);
+      // 只在非 403 错误时记录（403 表示未登录，这是正常的）
+      if (error.response?.status !== 403) {
+        console.error('Failed to load notifications:', error);
+      }
     }
   };
 
@@ -79,15 +82,41 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link to="/" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
-              首页
-            </Link>
-            <Link to="/restaurants" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
-              餐厅
-            </Link>
-            <Link to="/orders" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
-              我的订单
-            </Link>
+            {user?.role === 'CUSTOMER' && (
+              <>
+                <Link to="/" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
+                  首页
+                </Link>
+                <Link to="/restaurants" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
+                  餐厅
+                </Link>
+                <Link to="/orders" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
+                  我的订单
+                </Link>
+              </>
+            )}
+            
+            {user?.role === 'RESTAURANT_OWNER' && (
+              <>
+                <Link to="/restaurant-home" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
+                  首页
+                </Link>
+                <Link to="/restaurant-management" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
+                  订单管理
+                </Link>
+              </>
+            )}
+            
+            {user?.role === 'DRIVER' && (
+              <>
+                <Link to="/driver-home" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
+                  首页
+                </Link>
+                <Link to="/driver-dashboard" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
+                  配送工作台
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Right Side Icons */}
@@ -113,18 +142,20 @@ const Navbar = () => {
               )}
             </Link>
 
-            {/* Shopping Cart */}
-            <Link
-              to="/cart"
-              className="relative p-2 text-gray-600 hover:text-primary-600 transition-colors"
-            >
-              <ShoppingCart className="w-6 h-6" />
-              {getTotalItems() > 0 && (
-                <span className="absolute -top-1 -right-1 bg-primary-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                  {getTotalItems() > 99 ? '99+' : getTotalItems()}
-                </span>
-              )}
-            </Link>
+            {/* Shopping Cart - Only for CUSTOMER */}
+            {user?.role === 'CUSTOMER' && (
+              <Link
+                to="/cart"
+                className="relative p-2 text-gray-600 hover:text-primary-600 transition-colors"
+              >
+                <ShoppingCart className="w-6 h-6" />
+                {getTotalItems() > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-primary-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                    {getTotalItems() > 99 ? '99+' : getTotalItems()}
+                  </span>
+                )}
+              </Link>
+            )}
 
             {/* User Menu */}
             <div className="hidden md:flex items-center space-x-3">

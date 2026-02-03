@@ -14,6 +14,10 @@ import Checkout from './pages/Checkout';
 import Orders from './pages/Orders';
 import OrderDetail from './pages/OrderDetail';
 import Notifications from './pages/Notifications';
+import RestaurantManagement from './pages/RestaurantManagement';
+import RestaurantHome from './pages/RestaurantHome';
+import DriverDashboard from './pages/DriverDashboard';
+import DriverHome from './pages/DriverHome';
 
 // Components
 import Navbar from './components/Navbar';
@@ -36,15 +40,27 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           
-          {/* Protected Routes */}
+          {/* Protected Routes - Different home pages based on role */}
           <Route path="/" element={<PrivateRoute><Home /></PrivateRoute>} />
+          <Route path="/restaurant-home" element={<PrivateRoute><RestaurantHome /></PrivateRoute>} />
+          <Route path="/driver-home" element={<PrivateRoute><DriverHome /></PrivateRoute>} />
+          
+          {/* Customer Routes */}
           <Route path="/restaurants" element={<PrivateRoute><Restaurants /></PrivateRoute>} />
           <Route path="/restaurants/:id" element={<PrivateRoute><RestaurantDetail /></PrivateRoute>} />
           <Route path="/cart" element={<PrivateRoute><Cart /></PrivateRoute>} />
           <Route path="/checkout" element={<PrivateRoute><Checkout /></PrivateRoute>} />
           <Route path="/orders" element={<PrivateRoute><Orders /></PrivateRoute>} />
           <Route path="/orders/:id" element={<PrivateRoute><OrderDetail /></PrivateRoute>} />
+          
+          {/* Common Routes */}
           <Route path="/notifications" element={<PrivateRoute><Notifications /></PrivateRoute>} />
+          
+          {/* Restaurant Owner Routes */}
+          <Route path="/restaurant-management" element={<PrivateRoute><RestaurantManagement /></PrivateRoute>} />
+          
+          {/* Driver Routes */}
+          <Route path="/driver-dashboard" element={<PrivateRoute><DriverDashboard /></PrivateRoute>} />
           
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />

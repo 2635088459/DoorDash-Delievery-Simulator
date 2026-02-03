@@ -58,7 +58,7 @@ public class CartItem {
     private BigDecimal priceAtAdd;
 
     /**
-     * 特殊要求（可选）
+     * 特殊要求
      */
     @Column(name = "special_instructions", length = 500)
     private String specialInstructions;
