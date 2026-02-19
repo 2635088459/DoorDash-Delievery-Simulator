@@ -15,7 +15,7 @@ class WebSocketService {
     }
 
     this.client = new Client({
-      webSocketFactory: () => new SockJS('http://localhost:8080/api/ws'),
+  webSocketFactory: () => new SockJS('/api/ws'),
       
       connectHeaders: {},
       

@@ -11,6 +11,7 @@ const Checkout = () => {
   const { user } = useAuthStore();
   const { items, restaurantId, restaurantName, getTotalPrice, clearCart } = useCartStore();
   const [loading, setLoading] = useState(false);
+  const [tipAmount, setTipAmount] = useState('0');
   
   const [deliveryAddress, setDeliveryAddress] = useState({
     street: '',
@@ -21,6 +22,10 @@ const Checkout = () => {
   });
 
   const [paymentMethod, setPaymentMethod] = useState('CREDIT_CARD'); // CREDIT_CARD, CASH
+
+  const subtotal = getTotalPrice();
+  const parsedTip = Number.isNaN(Number(tipAmount)) ? 0 : Math.max(0, Number(tipAmount));
+  const totalWithTip = subtotal + parsedTip;
 
   // 如果购物车为空，重定向
   useEffect(() => {
@@ -54,6 +59,7 @@ const Checkout = () => {
           deliveryInstructions: deliveryAddress.instructions || null,
         },
         paymentMethod: paymentMethod,
+        tipAmount: parsedTip,
       };
 
       console.log('Creating order:', orderData);
@@ -243,6 +249,32 @@ const Checkout = () => {
                 </div>
               </div>
             </div>
+
+            {/* Tip Amount */}
+            <div className="bg-white rounded-xl shadow-sm p-6">
+              <div className="flex items-center mb-4">
+                <Wallet className="w-6 h-6 text-primary-600 mr-3" />
+                <h2 className="text-xl font-bold text-gray-900">给骑手小费</h2>
+              </div>
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  小费金额（可选）
+                </label>
+                <div className="flex items-center space-x-3">
+                  <span className="text-gray-600">¥</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={tipAmount}
+                    onChange={(e) => setTipAmount(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    placeholder="0.00"
+                  />
+                </div>
+                <p className="text-xs text-gray-500">小费将直接计入骑手收益</p>
+              </div>
+            </div>
           </div>
 
           {/* Right Column - Order Summary */}
@@ -268,7 +300,7 @@ const Checkout = () => {
               <div className="border-t border-gray-200 pt-4 space-y-3">
                 <div className="flex justify-between text-gray-700">
                   <span>小计</span>
-                  <span>¥{getTotalPrice().toFixed(2)}</span>
+                  <span>¥{subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-gray-700">
                   <span>配送费</span>
@@ -278,11 +310,15 @@ const Checkout = () => {
                   <span>服务费</span>
                   <span>¥0.00</span>
                 </div>
+                <div className="flex justify-between text-gray-700">
+                  <span>小费</span>
+                  <span>¥{parsedTip.toFixed(2)}</span>
+                </div>
                 <div className="border-t border-gray-200 pt-3">
                   <div className="flex justify-between items-center">
                     <span className="text-lg font-bold text-gray-900">总计</span>
                     <span className="text-2xl font-bold text-primary-600">
-                      ¥{getTotalPrice().toFixed(2)}
+                      ¥{totalWithTip.toFixed(2)}
                     </span>
                   </div>
                 </div>

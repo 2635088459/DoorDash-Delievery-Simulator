@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 /**
  * 餐厅响应 DTO
@@ -28,6 +29,10 @@ public class RestaurantDTO {
     private String state;
     private String zipCode;
     private String phoneNumber;
+    private LocalTime openingTime;
+    private LocalTime closingTime;
+    private String weeklyScheduleJson;
+    private String restDaysJson;
     private Boolean isActive;
     private BigDecimal rating;
     private Integer totalReviews;

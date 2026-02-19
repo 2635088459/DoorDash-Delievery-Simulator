@@ -92,6 +92,12 @@ public class AuthService {
             log.error("Invalid credentials for user: {}", request.getEmail());
             throw new BusinessException("Invalid email or password");
         }
+
+        if (user.getRole() == null) {
+            user.setRole(User.UserRole.CUSTOMER);
+            userRepository.save(user);
+            log.info("User role defaulted to CUSTOMER for user: {}", user.getEmail());
+        }
         
         // 3. 检查用户状态
         if (!user.getIsActive()) {

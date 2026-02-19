@@ -1,14 +1,142 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Store, ShoppingBag, Clock, Gift, TrendingUp, Users } from 'lucide-react';
+import { menuItemService, orderService, restaurantService } from '../services/apiService';
+
+const weekDayKeys = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+
+const parseJsonValue = (value, fallback) => {
+  if (!value) return fallback;
+  try {
+    return JSON.parse(value);
+  } catch (err) {
+    console.warn('Failed to parse schedule JSON:', err);
+    return fallback;
+  }
+};
+
+const countOpenDays = (schedule = {}) => {
+  return weekDayKeys.reduce((count, key) => {
+    if (schedule[key]?.isClosed) {
+      return count;
+    }
+    return count + 1;
+  }, 0);
+};
+
+const countRestDaysInWeek = (restDays = []) => {
+  if (!Array.isArray(restDays) || restDays.length === 0) return 0;
+  const today = new Date();
+  const day = today.getDay();
+  const diffToMonday = day === 0 ? -6 : 1 - day;
+  const weekStart = new Date(today);
+  weekStart.setDate(today.getDate() + diffToMonday);
+  weekStart.setHours(0, 0, 0, 0);
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 6);
+
+  return restDays.reduce((count, value) => {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return count;
+    if (date >= weekStart && date <= weekEnd) return count + 1;
+    return count;
+  }, 0);
+};
 
 const RestaurantHome = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
+  const [stats, setStats] = useState({
+    todayOrders: 0,
+    todayRevenue: 0,
+    menuCount: 0,
+    rating: null,
+    weeklyOpenDays: null,
+  });
+  const [hasRestaurant, setHasRestaurant] = useState(true);
+  const [setupMessage, setSetupMessage] = useState('');
+  const [restaurants, setRestaurants] = useState([]);
+  const [selectedRestaurantId, setSelectedRestaurantId] = useState(null);
+
+  const loadStatsForRestaurant = async (restaurant) => {
+    const [menuItems, orders] = await Promise.all([
+      menuItemService.getAllByRestaurant(restaurant.id),
+      orderService.getRestaurantOrders(restaurant.id),
+    ]);
+
+    const weeklySchedule = parseJsonValue(restaurant.weeklyScheduleJson, {});
+    const restDays = parseJsonValue(restaurant.restDaysJson, []);
+    const openDays = countOpenDays(weeklySchedule);
+    const restDaysThisWeek = countRestDaysInWeek(restDays);
+    const weeklyOpenDays = Math.max(openDays - restDaysThisWeek, 0);
+
+    const today = new Date().toDateString();
+    const todayOrders = orders.filter((order) => {
+      if (!order.createdAt) return false;
+      return new Date(order.createdAt).toDateString() === today;
+    });
+
+    const todayRevenue = todayOrders.reduce(
+      (sum, order) => sum + Number(order.totalAmount || 0),
+      0
+    );
+
+    setStats({
+      todayOrders: todayOrders.length,
+      todayRevenue,
+      menuCount: menuItems.length,
+      rating: restaurant.rating ?? null,
+      weeklyOpenDays,
+    });
+  };
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
     setUser(storedUser);
+  }, []);
+
+  const handleRestaurantChange = (event) => {
+    const nextId = Number(event.target.value);
+    if (Number.isNaN(nextId)) return;
+    const nextRestaurant = restaurants.find((item) => item.id === nextId);
+    if (!nextRestaurant) return;
+    setSelectedRestaurantId(nextId);
+    restaurantService.setActiveRestaurantId(nextId);
+    loadStatsForRestaurant(nextRestaurant);
+  };
+
+  useEffect(() => {
+    const loadStats = async () => {
+      try {
+        const ownerRestaurants = await restaurantService.getMyRestaurants();
+        setRestaurants(ownerRestaurants);
+        if (!ownerRestaurants.length) {
+          setHasRestaurant(false);
+          setSetupMessage('您还没有创建餐厅，请先完成餐厅信息设置。');
+          return;
+        }
+
+        setHasRestaurant(true);
+        setSetupMessage('');
+
+        const activeId = restaurantService.getActiveRestaurantId();
+        const activeRestaurant =
+          ownerRestaurants.find((item) => item.id === activeId) || ownerRestaurants[0];
+
+        setSelectedRestaurantId(activeRestaurant.id);
+        restaurantService.setActiveRestaurantId(activeRestaurant.id);
+
+        await loadStatsForRestaurant(activeRestaurant);
+      } catch (error) {
+        console.error('Failed to load restaurant stats:', error);
+        if (error.response?.status === 404) {
+          setHasRestaurant(false);
+          setSetupMessage('您还没有创建餐厅，请先完成餐厅信息设置。');
+        }
+      }
+    };
+
+    loadStats();
   }, []);
 
   const quickActions = [
@@ -34,7 +162,7 @@ const RestaurantHome = () => {
       description: '设置餐厅营业时间',
       color: 'bg-purple-500',
       hoverColor: 'hover:bg-purple-600',
-      link: '/business-hours'
+      link: '/business-hours?returnHome=true'
     },
     {
       icon: Gift,
@@ -78,15 +206,61 @@ const RestaurantHome = () => {
             </div>
             <Store className="w-24 h-24 opacity-20" />
           </div>
+          {restaurants.length > 0 && (
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                <span className="text-sm text-red-100">当前餐厅</span>
+                {restaurants.length > 1 ? (
+                  <select
+                    value={selectedRestaurantId || ''}
+                    onChange={handleRestaurantChange}
+                    className="bg-white/90 text-gray-800 border border-white/70 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-white"
+                  >
+                    {restaurants.map((item) => (
+                      <option key={item.id} value={item.id}>
+                        {item.name}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <span className="text-sm font-semibold text-white">
+                    {restaurants[0]?.name}
+                  </span>
+                )}
+              </div>
+              <button
+                onClick={() => navigate('/restaurant-setup')}
+                className="bg-white/90 text-red-600 px-3 py-2 rounded-lg text-sm font-semibold hover:bg-white"
+              >
+                新增餐厅
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        {!hasRestaurant && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6 mb-8">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <div className="text-lg font-semibold text-yellow-900">尚未创建餐厅</div>
+                <div className="text-yellow-800 mt-1">{setupMessage}</div>
+              </div>
+              <button
+                onClick={() => navigate('/restaurant-setup')}
+                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
+              >
+                立即创建餐厅
+              </button>
+            </div>
+          </div>
+        )}
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           <div className="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-500 text-sm font-medium">今日订单</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">0</p>
+                <p className="text-3xl font-bold text-gray-900 mt-1">{stats.todayOrders}</p>
               </div>
               <ShoppingBag className="w-12 h-12 text-blue-500 opacity-20" />
             </div>
@@ -96,7 +270,7 @@ const RestaurantHome = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-500 text-sm font-medium">今日营业额</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">¥0</p>
+                <p className="text-3xl font-bold text-gray-900 mt-1">¥{stats.todayRevenue.toFixed(2)}</p>
               </div>
               <TrendingUp className="w-12 h-12 text-green-500 opacity-20" />
             </div>
@@ -106,7 +280,7 @@ const RestaurantHome = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-500 text-sm font-medium">菜品总数</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">--</p>
+                <p className="text-3xl font-bold text-gray-900 mt-1">{stats.menuCount}</p>
               </div>
               <Store className="w-12 h-12 text-purple-500 opacity-20" />
             </div>
@@ -116,9 +290,23 @@ const RestaurantHome = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-500 text-sm font-medium">顾客评分</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">--</p>
+                <p className="text-3xl font-bold text-gray-900 mt-1">
+                  {stats.rating === null ? '--' : Number(stats.rating).toFixed(1)}
+                </p>
               </div>
               <Users className="w-12 h-12 text-orange-500 opacity-20" />
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-md p-6 border-l-4 border-emerald-500">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-500 text-sm font-medium">本周营业天数</p>
+                <p className="text-3xl font-bold text-gray-900 mt-1">
+                  {stats.weeklyOpenDays === null ? '--' : stats.weeklyOpenDays}
+                </p>
+              </div>
+              <Clock className="w-12 h-12 text-emerald-500 opacity-20" />
             </div>
           </div>
         </div>

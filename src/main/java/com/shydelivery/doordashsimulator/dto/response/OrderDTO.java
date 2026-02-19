@@ -59,6 +59,7 @@ public class OrderDTO {
      */
     private BigDecimal subtotal;
     private BigDecimal deliveryFee;
+    private BigDecimal tipAmount;
     private BigDecimal tax;
     private BigDecimal totalAmount;
     

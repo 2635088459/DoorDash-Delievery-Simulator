@@ -33,6 +33,10 @@ server:
   servlet:
     context-path: /api  # API路径前缀，访问时需要加 /api
 
+# 文件上传存储目录
+app:
+  upload-dir: uploads
+
 # AWS Cognito 配置
 aws:
   cognito:

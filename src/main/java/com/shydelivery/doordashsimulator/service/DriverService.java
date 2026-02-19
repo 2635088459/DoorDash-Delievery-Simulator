@@ -6,9 +6,12 @@ import com.shydelivery.doordashsimulator.dto.request.UpdateDriverStatusRequest;
 import com.shydelivery.doordashsimulator.dto.response.DriverDTO;
 import com.shydelivery.doordashsimulator.dto.response.DriverEarningsDTO;
 import com.shydelivery.doordashsimulator.entity.Driver;
+import com.shydelivery.doordashsimulator.entity.Order;
+import com.shydelivery.doordashsimulator.entity.Order.OrderStatus;
 import com.shydelivery.doordashsimulator.entity.User;
 import com.shydelivery.doordashsimulator.exception.BusinessException;
 import com.shydelivery.doordashsimulator.repository.DriverRepository;
+import com.shydelivery.doordashsimulator.repository.OrderRepository;
 import com.shydelivery.doordashsimulator.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +34,7 @@ public class DriverService {
     
     private final DriverRepository driverRepository;
     private final UserRepository userRepository;
+    private final OrderRepository orderRepository;
     
     /**
      * 注册为配送员
@@ -45,7 +49,21 @@ public class DriverService {
         
         // 2. 检查是否已经是配送员
         if (driverRepository.existsByUser(user)) {
-            throw new BusinessException("该用户已经是配送员");
+            if (user.getRole() != User.UserRole.DRIVER) {
+                user.setRole(User.UserRole.DRIVER);
+                userRepository.save(user);
+                log.info("用户角色已升级为配送员: userId={}", user.getId());
+            }
+            Driver existing = driverRepository.findByUser(user)
+                .orElseThrow(() -> new BusinessException("配送员信息不存在"));
+            return convertToDTO(existing);
+        }
+
+        // 2.5 升级用户角色为配送员
+        if (user.getRole() != User.UserRole.DRIVER) {
+            user.setRole(User.UserRole.DRIVER);
+            userRepository.save(user);
+            log.info("用户角色已升级为配送员: userId={}", user.getId());
         }
         
         // 3. 检查驾驶证是否已被使用
@@ -62,6 +80,7 @@ public class DriverService {
             .isAvailable(false)  // 默认离线状态
             .rating(new BigDecimal("5.00"))
             .totalDeliveries(0)
+            .totalEarnings(BigDecimal.ZERO)
             .build();
         
         Driver saved = driverRepository.save(driver);
@@ -74,6 +93,7 @@ public class DriverService {
     /**
      * 获取配送员信息
      */
+    @Transactional
     public DriverDTO getDriverInfo(String userEmail) {
         Driver driver = findDriverByUserEmail(userEmail);
         return convertToDTO(driver);
@@ -134,23 +154,43 @@ public class DriverService {
     /**
      * 获取配送员收益统计
      */
+    @Transactional
     public DriverEarningsDTO getEarnings(String userEmail) {
         Driver driver = findDriverByUserEmail(userEmail);
-        
+
+        User driverUser = driver.getUser();
+        Long driverId = driverUser.getId();
+        Long todayCount = orderRepository.countDeliveredTodayByDriver(driverId);
+        Long weekCount = orderRepository.countDeliveredWeekByDriver(driverId);
+        int todayDeliveries = todayCount == null ? 0 : todayCount.intValue();
+        int weekDeliveries = weekCount == null ? 0 : weekCount.intValue();
+
+        BigDecimal todayEarnings = orderRepository.sumDeliveredTodayEarningsByDriver(driverId);
+        BigDecimal weekEarnings = orderRepository.sumDeliveredWeekEarningsByDriver(driverId);
+        if (todayEarnings == null) {
+            todayEarnings = BigDecimal.ZERO;
+        }
+        if (weekEarnings == null) {
+            weekEarnings = BigDecimal.ZERO;
+        }
+
+        BigDecimal totalEarnings = driver.getTotalEarnings();
+        int totalDeliveries = driver.getTotalDeliveries();
+
         BigDecimal averageEarnings = BigDecimal.ZERO;
-        if (driver.getTotalDeliveries() > 0) {
-            averageEarnings = driver.getTotalEarnings()
-                .divide(new BigDecimal(driver.getTotalDeliveries()), 2, RoundingMode.HALF_UP);
+        if (totalDeliveries > 0) {
+            averageEarnings = totalEarnings
+                .divide(new BigDecimal(totalDeliveries), 2, RoundingMode.HALF_UP);
         }
         
         return DriverEarningsDTO.builder()
-            .todayEarnings(BigDecimal.ZERO)  // TODO: 从配送记录计算
-            .todayDeliveries(0)
-            .weekEarnings(BigDecimal.ZERO)   // TODO: 从配送记录计算
-            .weekDeliveries(0)
-            .totalEarnings(driver.getTotalEarnings())
-            .availableBalance(BigDecimal.ZERO)  // 使用 driver 实体中的字段
-            .totalDeliveries(driver.getTotalDeliveries())
+            .todayEarnings(todayEarnings)
+            .todayDeliveries(todayDeliveries)
+            .weekEarnings(weekEarnings)
+            .weekDeliveries(weekDeliveries)
+            .totalEarnings(totalEarnings)
+            .availableBalance(totalEarnings)
+            .totalDeliveries(totalDeliveries)
             .averageEarningsPerDelivery(averageEarnings)
             .build();
     }
@@ -193,9 +233,40 @@ public class DriverService {
     private Driver findDriverByUserEmail(String email) {
         User user = userRepository.findByEmail(email)
             .orElseThrow(() -> new BusinessException("用户不存在"));
-        
+
+        if (user.getRole() != User.UserRole.DRIVER) {
+            user.setRole(User.UserRole.DRIVER);
+            userRepository.save(user);
+            log.info("用户角色已升级为配送员: userId={}", user.getId());
+        }
+
         return driverRepository.findByUser(user)
-            .orElseThrow(() -> new BusinessException("该用户不是配送员"));
+            .orElseGet(() -> createDefaultDriver(user));
+    }
+
+    private Driver createDefaultDriver(User user) {
+        String baseLicense = "AUTO-" + user.getId();
+        String licenseNumber = baseLicense;
+        int suffix = 1;
+        while (driverRepository.existsByLicenseNumber(licenseNumber)) {
+            licenseNumber = baseLicense + "-" + suffix;
+            suffix++;
+        }
+
+        Driver driver = Driver.builder()
+            .user(user)
+            .vehicleType(Driver.VehicleType.WALKING)
+            .licenseNumber(licenseNumber)
+            .vehiclePlate("N/A")
+            .isAvailable(false)
+            .rating(new BigDecimal("5.00"))
+            .totalDeliveries(0)
+            .totalEarnings(BigDecimal.ZERO)
+            .build();
+
+        Driver saved = driverRepository.save(driver);
+        log.info("自动创建配送员档案: driverId={}, userId={}", saved.getId(), user.getId());
+        return saved;
     }
     
     /**
@@ -243,8 +314,8 @@ public class DriverService {
             .rating(driver.getRating())
             .totalDeliveries(driver.getTotalDeliveries())
             .completedDeliveries(driver.getTotalDeliveries())  // TODO: 从实体获取
-            .totalEarnings(BigDecimal.ZERO)  // TODO: 从实体获取
-            .availableBalance(BigDecimal.ZERO)
+            .totalEarnings(driver.getTotalEarnings())
+            .availableBalance(driver.getTotalEarnings())
             .isActive(true)
             .createdAt(driver.getCreatedAt())
             .updatedAt(driver.getUpdatedAt())

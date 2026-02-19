@@ -86,6 +86,12 @@ public class Order {
     private BigDecimal deliveryFee;
 
     /**
+     * Tip amount for the driver
+     */
+    @Column(name = "tip_amount", precision = 10, scale = 2)
+    private BigDecimal tipAmount = BigDecimal.ZERO;
+
+    /**
      * Tax amount calculated on subtotal
      */
     @Column(nullable = false, precision = 10, scale = 2)
@@ -209,9 +215,11 @@ public class Order {
      * Calculate total amount from subtotal, delivery fee, and tax
      */
     public void calculateTotalAmount() {
+        BigDecimal tip = this.tipAmount == null ? BigDecimal.ZERO : this.tipAmount;
         this.totalAmount = this.subtotal
             .add(this.deliveryFee)
-            .add(this.tax);
+            .add(this.tax)
+            .add(tip);
     }
 
     /**

@@ -61,7 +61,7 @@ public class DriverController {
      * GET /api/drivers/me
      */
     @GetMapping("/me")
-    @PreAuthorize("hasRole('CUSTOMER')")  // 任何用户都可以查看自己的配送员信息
+    @PreAuthorize("hasAnyRole('CUSTOMER','DRIVER')")
     public ResponseEntity<DriverDTO> getMyInfo(Authentication authentication) {
         
         String email = authentication.getName();
@@ -75,7 +75,7 @@ public class DriverController {
      * PUT /api/drivers/status
      */
     @PutMapping("/status")
-    @PreAuthorize("hasRole('CUSTOMER')")
+    @PreAuthorize("hasAnyRole('CUSTOMER','DRIVER')")
     public ResponseEntity<DriverDTO> updateStatus(
             @Valid @RequestBody UpdateDriverStatusRequest request,
             Authentication authentication) {
@@ -93,7 +93,7 @@ public class DriverController {
      * PUT /api/drivers/location
      */
     @PutMapping("/location")
-    @PreAuthorize("hasRole('CUSTOMER')")
+    @PreAuthorize("hasAnyRole('CUSTOMER','DRIVER')")
     public ResponseEntity<DriverDTO> updateLocation(
             @Valid @RequestBody UpdateDriverLocationRequest request,
             Authentication authentication) {
@@ -109,7 +109,7 @@ public class DriverController {
      * GET /api/drivers/earnings
      */
     @GetMapping("/earnings")
-    @PreAuthorize("hasRole('CUSTOMER')")
+    @PreAuthorize("hasAnyRole('CUSTOMER','DRIVER')")
     public ResponseEntity<DriverEarningsDTO> getEarnings(Authentication authentication) {
         
         String email = authentication.getName();

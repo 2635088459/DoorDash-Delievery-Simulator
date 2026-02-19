@@ -348,6 +348,36 @@ public class AuthorizationService {
         
         log.debug("评价所有权验证成功: reviewId={}, customerId={}", reviewId, user.getId());
     }
+
+    /**
+     * 验证评价所属餐厅的所有权（餐厅老板回复评价）
+     *
+     * @param reviewId 评价 ID
+     * @param email 用户邮箱（餐厅老板）
+     */
+    public void verifyReviewRestaurantOwner(Long reviewId, String email) {
+        log.debug("验证评价餐厅所有权: reviewId={}, email={}", reviewId, email);
+
+        com.shydelivery.doordashsimulator.entity.Review review =
+            reviewRepository.findById(reviewId)
+                .orElseThrow(() -> {
+                    log.warn("评价不存在: reviewId={}", reviewId);
+                    return new ResourceNotFoundException("评价不存在，ID: " + reviewId);
+                });
+
+        User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> {
+                log.warn("用户不存在: email={}", email);
+                return new UsernameNotFoundException("用户不存在: " + email);
+            });
+
+        if (!review.getRestaurant().getOwner().getId().equals(user.getId())) {
+            log.warn("访问被拒绝: 用户 {} 不是评价 {} 所属餐厅的所有者", email, reviewId);
+            throw new AccessDeniedException("您没有权限回复此评价");
+        }
+
+        log.debug("评价餐厅所有权验证成功: reviewId={}, ownerId={}", reviewId, user.getId());
+    }
     
     /**
      * 验证评价的订单所有权

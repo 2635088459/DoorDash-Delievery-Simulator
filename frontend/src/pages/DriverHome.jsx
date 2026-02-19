@@ -1,14 +1,48 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bike, MapPin, DollarSign, Clock, TrendingUp, Award } from 'lucide-react';
+import { Bike, MapPin, DollarSign, TrendingUp, Award, Package } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { driverService } from '../services/apiService';
 
 const DriverHome = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    todayDeliveries: 0,
+    todayEarnings: 0,
+    weekEarnings: 0,
+    rating: null,
+  });
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
     setUser(storedUser);
+  }, []);
+
+  useEffect(() => {
+    const loadStats = async () => {
+      try {
+        setLoading(true);
+        const [earnings, driver] = await Promise.all([
+          driverService.getEarnings(),
+          driverService.getMe(),
+        ]);
+        setStats({
+          todayDeliveries: earnings?.todayDeliveries ?? 0,
+          todayEarnings: Number(earnings?.todayEarnings ?? 0),
+          weekEarnings: Number(earnings?.weekEarnings ?? 0),
+          rating: driver?.rating ?? null,
+        });
+      } catch (error) {
+        console.error('Failed to load driver stats:', error);
+        toast.error(error.response?.data?.message || '加载骑手数据失败');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadStats();
   }, []);
 
   const quickActions = [
@@ -21,28 +55,12 @@ const DriverHome = () => {
       link: '/driver-dashboard'
     },
     {
-      icon: Clock,
-      title: '配送历史',
-      description: '查看历史配送记录',
+      icon: Package,
+      title: '我的配送',
+      description: '查看当前配送订单',
       color: 'bg-green-500',
       hoverColor: 'hover:bg-green-600',
-      link: '/delivery-history'
-    },
-    {
-      icon: DollarSign,
-      title: '我的收入',
-      description: '查看收入和提现',
-      color: 'bg-yellow-500',
-      hoverColor: 'hover:bg-yellow-600',
-      link: '/earnings'
-    },
-    {
-      icon: Award,
-      title: '骑手等级',
-      description: '查看等级和奖励',
-      color: 'bg-purple-500',
-      hoverColor: 'hover:bg-purple-600',
-      link: '/driver-level'
+      link: '/driver-deliveries'
     }
   ];
 
@@ -70,7 +88,9 @@ const DriverHome = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-500 text-sm font-medium">今日配送</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">0</p>
+                <p className="text-3xl font-bold text-gray-900 mt-1">
+                  {loading ? '--' : stats.todayDeliveries}
+                </p>
                 <p className="text-xs text-gray-400 mt-1">笔订单</p>
               </div>
               <MapPin className="w-12 h-12 text-blue-500 opacity-20" />
@@ -81,7 +101,9 @@ const DriverHome = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-500 text-sm font-medium">今日收入</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">¥0</p>
+                <p className="text-3xl font-bold text-gray-900 mt-1">
+                  ¥{loading ? '--' : stats.todayEarnings.toFixed(2)}
+                </p>
                 <p className="text-xs text-gray-400 mt-1">配送费</p>
               </div>
               <DollarSign className="w-12 h-12 text-green-500 opacity-20" />
@@ -92,7 +114,9 @@ const DriverHome = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-500 text-sm font-medium">本周收入</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">¥0</p>
+                <p className="text-3xl font-bold text-gray-900 mt-1">
+                  ¥{loading ? '--' : stats.weekEarnings.toFixed(2)}
+                </p>
                 <p className="text-xs text-gray-400 mt-1">总计</p>
               </div>
               <TrendingUp className="w-12 h-12 text-yellow-500 opacity-20" />
@@ -103,7 +127,9 @@ const DriverHome = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-500 text-sm font-medium">骑手评分</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">--</p>
+                <p className="text-3xl font-bold text-gray-900 mt-1">
+                  {loading ? '--' : stats.rating?.toFixed(1) ?? '--'}
+                </p>
                 <p className="text-xs text-gray-400 mt-1">满分5.0</p>
               </div>
               <Award className="w-12 h-12 text-purple-500 opacity-20" />

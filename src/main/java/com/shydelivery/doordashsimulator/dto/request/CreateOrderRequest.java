@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -56,6 +57,11 @@ public class CreateOrderRequest {
      * Special instructions for delivery (optional)
      */
     private String specialInstructions;
+
+    /**
+     * Optional tip for the driver
+     */
+    private BigDecimal tipAmount;
     
     /**
      * Nested class for delivery address

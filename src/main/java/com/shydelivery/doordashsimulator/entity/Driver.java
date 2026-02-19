@@ -86,6 +86,13 @@ public class Driver {
     @Column(name = "total_deliveries", nullable = false)
     private Integer totalDeliveries = 0;
 
+    /**
+     * Total earnings for the driver (delivery fee + tips)
+     */
+    @Builder.Default
+    @Column(name = "total_earnings", precision = 10, scale = 2)
+    private BigDecimal totalEarnings = BigDecimal.ZERO;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -145,7 +152,6 @@ public class Driver {
      * Get total earnings (temporarily return ZERO, will calculate from deliveries later)
      */
     public BigDecimal getTotalEarnings() {
-        // TODO: Calculate from actual delivery records
-        return BigDecimal.ZERO;
+        return totalEarnings == null ? BigDecimal.ZERO : totalEarnings;
     }
 }

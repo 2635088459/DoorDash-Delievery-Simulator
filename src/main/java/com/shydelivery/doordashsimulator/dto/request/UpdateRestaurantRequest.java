@@ -27,6 +27,18 @@ public class UpdateRestaurantRequest {
     
     @Pattern(regexp = "^\\+?[1-9]\\d{1,14}$", message = "电话号码格式不正确")
     private String phoneNumber;
+
+    @Pattern(regexp = "^(?:[01]\\d|2[0-3]):[0-5]\\d$", message = "营业开始时间格式应为 HH:mm")
+    private String openingTime;
+
+    @Pattern(regexp = "^(?:[01]\\d|2[0-3]):[0-5]\\d$", message = "营业结束时间格式应为 HH:mm")
+    private String closingTime;
+
+    @Size(max = 20000, message = "每周营业时间配置过长")
+    private String weeklyScheduleJson;
+
+    @Size(max = 10000, message = "休息日配置过长")
+    private String restDaysJson;
     
     private Boolean isActive;
 }

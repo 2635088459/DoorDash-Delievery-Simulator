@@ -1,6 +1,7 @@
 package com.shydelivery.doordashsimulator.controller;
 
 import com.shydelivery.doordashsimulator.dto.request.CreateReviewRequest;
+import com.shydelivery.doordashsimulator.dto.request.UpdateReviewReplyRequest;
 import com.shydelivery.doordashsimulator.dto.request.UpdateReviewRequest;
 import com.shydelivery.doordashsimulator.dto.response.RestaurantRatingDTO;
 import com.shydelivery.doordashsimulator.dto.response.ReviewDTO;
@@ -113,6 +114,31 @@ public class ReviewController {
         reviewService.deleteReview(id, authentication.getName());
         
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * 餐厅老板回复评价 (仅 RESTAURANT_OWNER)
+     *
+     * RBAC: @PreAuthorize("hasRole('RESTAURANT_OWNER')")
+     * 权限验证: AuthorizationService.verifyReviewRestaurantOwner()
+     *
+     * @param id 评价 ID
+     * @param request 回复请求
+     * @param authentication 认证信息
+     * @return 更新后的评价
+     */
+    @PutMapping("/{id}/reply")
+    @PreAuthorize("hasRole('RESTAURANT_OWNER')")
+    public ResponseEntity<ReviewDTO> replyToReview(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateReviewReplyRequest request,
+            Authentication authentication) {
+
+        log.info("API - 回复评价: reviewId={}, owner={}", id, authentication.getName());
+
+        ReviewDTO review = reviewService.replyToReview(id, request, authentication.getName());
+
+        return ResponseEntity.ok(review);
     }
     
     /**

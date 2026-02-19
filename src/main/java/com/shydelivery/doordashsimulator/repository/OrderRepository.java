@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -103,4 +104,40 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * Used by: DRIVER role to filter their deliveries
      */
     List<Order> findByDriverAndStatus(User driver, OrderStatus status);
+
+    /**
+     * Count driver's delivered orders for today
+     */
+    @Query(value = "SELECT COUNT(*) FROM orders o WHERE o.driver_id = :driverId " +
+        "AND o.status = 'DELIVERED' AND DATE(o.actual_delivery) = CURRENT_DATE",
+        nativeQuery = true)
+    Long countDeliveredTodayByDriver(@Param("driverId") Long driverId);
+
+    /**
+     * Sum driver's delivery fee for today
+     */
+    @Query(value = "SELECT COALESCE(SUM(o.delivery_fee + COALESCE(o.tip_amount, 0)), 0) FROM orders o WHERE o.driver_id = :driverId " +
+        "AND o.status = 'DELIVERED' AND DATE(o.actual_delivery) = CURRENT_DATE",
+        nativeQuery = true)
+    BigDecimal sumDeliveredTodayEarningsByDriver(@Param("driverId") Long driverId);
+
+    /**
+     * Count driver's delivered orders for current week
+     */
+    @Query(value = "SELECT COUNT(*) FROM orders o WHERE o.driver_id = :driverId " +
+        "AND o.status = 'DELIVERED' " +
+        "AND o.actual_delivery >= date_trunc('week', CURRENT_DATE) " +
+        "AND o.actual_delivery < date_trunc('week', CURRENT_DATE) + interval '7 days'",
+        nativeQuery = true)
+    Long countDeliveredWeekByDriver(@Param("driverId") Long driverId);
+
+    /**
+     * Sum driver's delivery fee for current week
+     */
+    @Query(value = "SELECT COALESCE(SUM(o.delivery_fee + COALESCE(o.tip_amount, 0)), 0) FROM orders o WHERE o.driver_id = :driverId " +
+        "AND o.status = 'DELIVERED' " +
+        "AND o.actual_delivery >= date_trunc('week', CURRENT_DATE) " +
+        "AND o.actual_delivery < date_trunc('week', CURRENT_DATE) + interval '7 days'",
+        nativeQuery = true)
+    BigDecimal sumDeliveredWeekEarningsByDriver(@Param("driverId") Long driverId);
 }

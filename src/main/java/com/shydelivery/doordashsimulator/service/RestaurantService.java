@@ -5,9 +5,11 @@ import com.shydelivery.doordashsimulator.dto.request.UpdateRestaurantRequest;
 import com.shydelivery.doordashsimulator.dto.response.RestaurantDTO;
 import com.shydelivery.doordashsimulator.entity.Restaurant;
 import com.shydelivery.doordashsimulator.entity.User;
+import com.shydelivery.doordashsimulator.exception.BusinessException;
 import com.shydelivery.doordashsimulator.exception.ResourceNotFoundException;
 import com.shydelivery.doordashsimulator.repository.RestaurantRepository;
 import com.shydelivery.doordashsimulator.repository.UserRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -29,6 +31,7 @@ public class RestaurantService {
     private final RestaurantRepository restaurantRepository;
     private final UserRepository userRepository;
     private final AuthorizationService authorizationService;
+    private final ObjectMapper objectMapper;
     
     /**
      * 获取所有活跃餐厅（公开接口）
@@ -80,6 +83,8 @@ public class RestaurantService {
         // 设置默认营业时间（可以后续通过更新接口修改）
         restaurant.setOpeningTime(java.time.LocalTime.of(9, 0));  // 默认 9:00 AM
         restaurant.setClosingTime(java.time.LocalTime.of(22, 0)); // 默认 10:00 PM
+    restaurant.setWeeklyScheduleJson("{}");
+    restaurant.setRestDaysJson("[]");
         restaurant.setDeliveryFee(BigDecimal.valueOf(5.00));      // 默认配送费 $5
         restaurant.setMinimumOrder(BigDecimal.valueOf(10.00));    // 默认最低消费 $10
         restaurant.setLatitude(BigDecimal.valueOf(37.7749));      // 默认坐标 (San Francisco)
@@ -118,6 +123,20 @@ public class RestaurantService {
         }
         if (request.getPhoneNumber() != null) {
             restaurant.setPhoneNumber(request.getPhoneNumber());
+        }
+        if (request.getOpeningTime() != null && !request.getOpeningTime().isBlank()) {
+            restaurant.setOpeningTime(java.time.LocalTime.parse(request.getOpeningTime()));
+        }
+        if (request.getClosingTime() != null && !request.getClosingTime().isBlank()) {
+            restaurant.setClosingTime(java.time.LocalTime.parse(request.getClosingTime()));
+        }
+        if (request.getWeeklyScheduleJson() != null) {
+            validateJsonField(request.getWeeklyScheduleJson(), "每周营业时间");
+            restaurant.setWeeklyScheduleJson(request.getWeeklyScheduleJson());
+        }
+        if (request.getRestDaysJson() != null) {
+            validateJsonField(request.getRestDaysJson(), "休息日配置");
+            restaurant.setRestDaysJson(request.getRestDaysJson());
         }
         if (request.getIsActive() != null) {
             restaurant.setIsActive(request.getIsActive());
@@ -177,11 +196,26 @@ public class RestaurantService {
                 .state(restaurant.getState())
                 .zipCode(restaurant.getZipCode())
                 .phoneNumber(restaurant.getPhoneNumber())
+                .openingTime(restaurant.getOpeningTime())
+                .closingTime(restaurant.getClosingTime())
+                .weeklyScheduleJson(restaurant.getWeeklyScheduleJson())
+                .restDaysJson(restaurant.getRestDaysJson())
                 .isActive(restaurant.getIsActive())
                 .rating(restaurant.getRating())
                 .totalReviews(0) // TODO: 从 reviews 表计算
                 .createdAt(restaurant.getCreatedAt())
                 .updatedAt(restaurant.getUpdatedAt())
                 .build();
+    }
+
+    private void validateJsonField(String json, String fieldName) {
+        if (json == null || json.isBlank()) {
+            return;
+        }
+        try {
+            objectMapper.readTree(json);
+        } catch (Exception ex) {
+            throw new BusinessException(fieldName + " JSON 格式无效", ex);
+        }
     }
 }

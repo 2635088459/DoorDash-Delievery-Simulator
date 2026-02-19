@@ -1,6 +1,7 @@
 package com.shydelivery.doordashsimulator.service;
 
 import com.shydelivery.doordashsimulator.dto.request.CreateReviewRequest;
+import com.shydelivery.doordashsimulator.dto.request.UpdateReviewReplyRequest;
 import com.shydelivery.doordashsimulator.dto.request.UpdateReviewRequest;
 import com.shydelivery.doordashsimulator.dto.response.RestaurantRatingDTO;
 import com.shydelivery.doordashsimulator.dto.response.ReviewDTO;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -157,6 +159,36 @@ public class ReviewService {
         reviewRepository.deleteById(reviewId);
         log.info("评价删除成功: reviewId={}", reviewId);
     }
+
+    /**
+     * 餐厅老板回复评价
+     *
+     * @param reviewId 评价 ID
+     * @param request 回复请求
+     * @param ownerEmail 餐厅老板邮箱
+     * @return 更新后的评价 DTO
+     */
+    @Transactional
+    public ReviewDTO replyToReview(Long reviewId, UpdateReviewReplyRequest request, String ownerEmail) {
+        log.info("回复评价: reviewId={}, owner={}", reviewId, ownerEmail);
+
+        authorizationService.verifyReviewRestaurantOwner(reviewId, ownerEmail);
+
+        Review review = reviewRepository.findById(reviewId)
+            .orElseThrow(() -> new ResourceNotFoundException("评价不存在，ID: " + reviewId));
+
+        User owner = userRepository.findByEmail(ownerEmail)
+            .orElseThrow(() -> new ResourceNotFoundException("用户不存在: " + ownerEmail));
+
+        review.setReplyContent(request.getReplyContent());
+        review.setReplyBy(owner.getFirstName() + " " + owner.getLastName());
+        review.setReplyAt(LocalDateTime.now());
+
+        Review updated = reviewRepository.save(review);
+        log.info("评价回复成功: reviewId={}", reviewId);
+
+        return convertToDTO(updated);
+    }
     
     /**
      * 根据ID获取评价 (公开)
@@ -294,6 +326,9 @@ public class ReviewService {
             .deliveryRating(review.getDeliveryRating())
             .overallRating(review.getOverallRating())
             .comment(review.getComment())
+            .replyContent(review.getReplyContent())
+            .replyBy(review.getReplyBy())
+            .replyAt(review.getReplyAt())
             .createdAt(review.getCreatedAt())
             .updatedAt(review.getCreatedAt()) // Review entity doesn't have updatedAt
             .isPositive(review.isPositive())

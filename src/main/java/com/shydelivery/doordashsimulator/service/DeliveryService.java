@@ -1,10 +1,12 @@
 package com.shydelivery.doordashsimulator.service;
 
 import com.shydelivery.doordashsimulator.dto.response.DeliveryDTO;
+import com.shydelivery.doordashsimulator.entity.Driver;
 import com.shydelivery.doordashsimulator.entity.Order;
 import com.shydelivery.doordashsimulator.entity.Order.OrderStatus;
 import com.shydelivery.doordashsimulator.entity.User;
 import com.shydelivery.doordashsimulator.exception.ResourceNotFoundException;
+import com.shydelivery.doordashsimulator.repository.DriverRepository;
 import com.shydelivery.doordashsimulator.repository.OrderRepository;
 import com.shydelivery.doordashsimulator.util.DeliveryFeeCalculator;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +33,7 @@ import java.util.stream.Collectors;
 public class DeliveryService {
     
     private final OrderRepository orderRepository;
+    private final DriverRepository driverRepository;
     private final AuthorizationService authorizationService;
     private final DeliveryFeeCalculator feeCalculator;  // Phase 2: 新增
     
@@ -221,8 +224,28 @@ public class DeliveryService {
         // 保存
         Order saved = orderRepository.save(order);
         log.info("订单 {} 已送达", orderId);
+
+        // 更新配送员累计数据
+        if (order.getDriver() != null) {
+            driverRepository.findByUserId(order.getDriver().getId())
+                .ifPresent(driver -> updateDriverTotals(driver, order));
+        }
         
         return convertToDeliveryDTO(saved);
+    }
+
+    private void updateDriverTotals(Driver driver, Order order) {
+        int currentDeliveries = driver.getTotalDeliveries() != null ? driver.getTotalDeliveries() : 0;
+        driver.setTotalDeliveries(currentDeliveries + 1);
+
+        BigDecimal currentEarnings = driver.getTotalEarnings() != null ? driver.getTotalEarnings() : BigDecimal.ZERO;
+    BigDecimal fee = order.getDeliveryFee() != null ? order.getDeliveryFee() : BigDecimal.ZERO;
+    BigDecimal tip = order.getTipAmount() != null ? order.getTipAmount() : BigDecimal.ZERO;
+    driver.setTotalEarnings(currentEarnings.add(fee).add(tip));
+
+        driverRepository.save(driver);
+        log.info("配送员累计数据更新: driverId={}, totalDeliveries={}, totalEarnings={}",
+            driver.getId(), driver.getTotalDeliveries(), driver.getTotalEarnings());
     }
     
     /**

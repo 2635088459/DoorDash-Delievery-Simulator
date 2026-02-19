@@ -82,6 +82,13 @@ public class ReviewDTO {
      * 评论内容
      */
     private String comment;
+
+    /**
+     * Restaurant owner reply
+     */
+    private String replyContent;
+    private String replyBy;
+    private LocalDateTime replyAt;
     
     /**
      * 创建时间

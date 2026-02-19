@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-
-const API_BASE_URL = 'http://localhost:8080/api';
+import { orderService, restaurantService } from '../services/apiService';
 
 const statusMap = {
   PENDING: { label: '待确认', color: 'bg-yellow-100 text-yellow-800', next: 'CONFIRMED' },
@@ -42,38 +40,19 @@ const RestaurantManagement = () => {
   }, [navigate]);
 
   const fetchRestaurantOrders = async () => {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-
-      if (!token) {
-        setError('未找到登录凭证，请重新登录');
-        navigate('/login');
-        return;
-      }
-
-      console.log('Fetching restaurant info with token:', token ? 'Token exists' : 'No token');
 
       // 获取餐厅信息
-      const restaurantResponse = await axios.get(
-        `${API_BASE_URL}/restaurants/owner`,
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
-      setRestaurantInfo(restaurantResponse.data);
+      const restaurantData = await restaurantService.getOwnerRestaurant();
+      setRestaurantInfo(restaurantData);
 
       // 获取餐厅订单
-      const ordersResponse = await axios.get(
-        `${API_BASE_URL}/restaurants/${restaurantResponse.data.id}/orders`,
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
+      const ordersResponse = await orderService.getRestaurantOrders(restaurantData.id);
       
       // 按状态和创建时间排序
-      const sortedOrders = ordersResponse.data.sort((a, b) => {
+      const sortedOrders = (ordersResponse || []).sort((a, b) => {
         const statusPriority = {
           PENDING: 1,
           CONFIRMED: 2,
@@ -99,6 +78,13 @@ const RestaurantManagement = () => {
       console.error('Error response:', err.response);
       
       if (err.response?.status === 403) {
+        if (user.role === 'RESTAURANT_OWNER') {
+          setError('登录已过期，请重新登录');
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          navigate('/login');
+          return;
+        }
         setError('您没有权限访问此页面。请确保使用餐厅老板账号登录。');
       } else if (err.response?.status === 401) {
         setError('登录已过期，请重新登录');
@@ -115,18 +101,7 @@ const RestaurantManagement = () => {
 
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
-      const token = localStorage.getItem('token');
-      
-      await axios.put(
-        `${API_BASE_URL}/orders/${orderId}/status`,
-        { status: newStatus },
-        {
-          headers: { 
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+      await orderService.updateStatus(orderId, { status: newStatus });
 
       // 刷新订单列表
       await fetchRestaurantOrders();

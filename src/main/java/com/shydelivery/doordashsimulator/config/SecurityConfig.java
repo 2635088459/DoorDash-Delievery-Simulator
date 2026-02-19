@@ -75,6 +75,9 @@ public class SecurityConfig {
                         
                         // 评价公开接口（查看评价和评分统计）
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/reviews/**").permitAll()
+
+                        // 上传资源公开访问
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/uploads/**").permitAll()
                         
                         // 搜索公开接口（所有搜索功能）
                         .requestMatchers("/search/**").permitAll()

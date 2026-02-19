@@ -18,6 +18,13 @@ import RestaurantManagement from './pages/RestaurantManagement';
 import RestaurantHome from './pages/RestaurantHome';
 import DriverDashboard from './pages/DriverDashboard';
 import DriverHome from './pages/DriverHome';
+import DriverDeliveries from './pages/DriverDeliveries';
+import MenuManagement from './pages/MenuManagement';
+import BusinessHours from './pages/BusinessHours';
+import Reports from './pages/Reports';
+import Coupons from './pages/Coupons';
+import Reviews from './pages/Reviews';
+import RestaurantSetup from './pages/RestaurantSetup';
 
 // Components
 import Navbar from './components/Navbar';
@@ -58,9 +65,16 @@ function App() {
           
           {/* Restaurant Owner Routes */}
           <Route path="/restaurant-management" element={<PrivateRoute><RestaurantManagement /></PrivateRoute>} />
+          <Route path="/menu-management" element={<PrivateRoute><MenuManagement /></PrivateRoute>} />
+          <Route path="/business-hours" element={<PrivateRoute><BusinessHours /></PrivateRoute>} />
+          <Route path="/reports" element={<PrivateRoute><Reports /></PrivateRoute>} />
+          <Route path="/coupons" element={<PrivateRoute><Coupons /></PrivateRoute>} />
+          <Route path="/reviews" element={<PrivateRoute><Reviews /></PrivateRoute>} />
+          <Route path="/restaurant-setup" element={<PrivateRoute><RestaurantSetup /></PrivateRoute>} />
           
           {/* Driver Routes */}
           <Route path="/driver-dashboard" element={<PrivateRoute><DriverDashboard /></PrivateRoute>} />
+          <Route path="/driver-deliveries" element={<PrivateRoute><DriverDeliveries /></PrivateRoute>} />
           
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />

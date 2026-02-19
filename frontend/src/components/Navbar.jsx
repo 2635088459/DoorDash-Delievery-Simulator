@@ -104,6 +104,9 @@ const Navbar = () => {
                 <Link to="/restaurant-management" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
                   订单管理
                 </Link>
+                <Link to="/menu-management" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
+                  菜品管理
+                </Link>
               </>
             )}
             
@@ -114,6 +117,9 @@ const Navbar = () => {
                 </Link>
                 <Link to="/driver-dashboard" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
                   配送工作台
+                </Link>
+                <Link to="/driver-deliveries" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
+                  我的配送
                 </Link>
               </>
             )}
@@ -187,27 +193,83 @@ const Navbar = () => {
         {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-gray-200 animate-fade-in">
-            <Link
-              to="/"
-              className="block py-2 text-gray-700 hover:text-primary-600"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              首页
-            </Link>
-            <Link
-              to="/restaurants"
-              className="block py-2 text-gray-700 hover:text-primary-600"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              餐厅
-            </Link>
-            <Link
-              to="/orders"
-              className="block py-2 text-gray-700 hover:text-primary-600"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              我的订单
-            </Link>
+            {user?.role === 'CUSTOMER' && (
+              <>
+                <Link
+                  to="/"
+                  className="block py-2 text-gray-700 hover:text-primary-600"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  首页
+                </Link>
+                <Link
+                  to="/restaurants"
+                  className="block py-2 text-gray-700 hover:text-primary-600"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  餐厅
+                </Link>
+                <Link
+                  to="/orders"
+                  className="block py-2 text-gray-700 hover:text-primary-600"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  我的订单
+                </Link>
+              </>
+            )}
+
+            {user?.role === 'RESTAURANT_OWNER' && (
+              <>
+                <Link
+                  to="/restaurant-home"
+                  className="block py-2 text-gray-700 hover:text-primary-600"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  首页
+                </Link>
+                <Link
+                  to="/restaurant-management"
+                  className="block py-2 text-gray-700 hover:text-primary-600"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  订单管理
+                </Link>
+                <Link
+                  to="/menu-management"
+                  className="block py-2 text-gray-700 hover:text-primary-600"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  菜品管理
+                </Link>
+              </>
+            )}
+
+            {user?.role === 'DRIVER' && (
+              <>
+                <Link
+                  to="/driver-home"
+                  className="block py-2 text-gray-700 hover:text-primary-600"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  首页
+                </Link>
+                <Link
+                  to="/driver-dashboard"
+                  className="block py-2 text-gray-700 hover:text-primary-600"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  配送工作台
+                </Link>
+                <Link
+                  to="/driver-deliveries"
+                  className="block py-2 text-gray-700 hover:text-primary-600"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  我的配送
+                </Link>
+              </>
+            )}
             <div className="pt-4 mt-4 border-t border-gray-200">
               <div className="flex items-center space-x-2 py-2">
                 <User className="w-5 h-5 text-gray-600" />

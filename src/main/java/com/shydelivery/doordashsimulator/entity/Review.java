@@ -75,6 +75,24 @@ public class Review {
     @Column(columnDefinition = "TEXT")
     private String comment;
 
+    /**
+     * Restaurant owner reply content
+     */
+    @Column(name = "reply_content", columnDefinition = "TEXT")
+    private String replyContent;
+
+    /**
+     * Restaurant owner reply author name
+     */
+    @Column(name = "reply_by", length = 100)
+    private String replyBy;
+
+    /**
+     * Reply timestamp
+     */
+    @Column(name = "reply_at")
+    private LocalDateTime replyAt;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

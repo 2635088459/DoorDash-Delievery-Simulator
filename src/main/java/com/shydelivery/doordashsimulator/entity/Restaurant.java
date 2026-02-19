@@ -77,6 +77,12 @@ public class Restaurant {
     @Column(name = "closing_time", nullable = false)
     private LocalTime closingTime;
 
+    @Column(name = "weekly_schedule_json", columnDefinition = "TEXT")
+    private String weeklyScheduleJson;
+
+    @Column(name = "rest_days_json", columnDefinition = "TEXT")
+    private String restDaysJson;
+
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
 

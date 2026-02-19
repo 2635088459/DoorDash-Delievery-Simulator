@@ -104,6 +104,9 @@ public class OrderService {
         order.setPaymentMethod(request.getPaymentMethod());
         order.setPaymentStatus(PaymentStatus.PENDING);
         order.setSpecialInstructions(request.getSpecialInstructions());
+
+    BigDecimal tipAmount = request.getTipAmount() == null ? BigDecimal.ZERO : request.getTipAmount();
+    order.setTipAmount(tipAmount);
         
         // 获取配送地址
         Address deliveryAddress = null;
@@ -252,7 +255,7 @@ public class OrderService {
         }
         
         BigDecimal tax = subtotal.multiply(TAX_RATE).setScale(2, java.math.RoundingMode.HALF_UP);
-        BigDecimal totalAmount = subtotal.add(deliveryFee).add(tax);
+    BigDecimal totalAmount = subtotal.add(deliveryFee).add(tax).add(tipAmount);
         
         order.setSubtotal(subtotal);
         order.setDeliveryFee(deliveryFee);
@@ -514,6 +517,7 @@ public class OrderService {
                 .status(order.getStatus())
                 .subtotal(order.getSubtotal())
                 .deliveryFee(order.getDeliveryFee())
+                .tipAmount(order.getTipAmount())
                 .tax(order.getTax())
                 .totalAmount(order.getTotalAmount())
                 .paymentMethod(order.getPaymentMethod())
