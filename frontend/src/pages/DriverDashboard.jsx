@@ -5,10 +5,10 @@ import { MapPin, DollarSign, Package, Filter } from 'lucide-react';
 import { deliveryService } from '../services/apiService';
 
 const statusMap = {
-  READY_FOR_PICKUP: { label: '待取餐', color: 'bg-orange-100 text-orange-800' },
-  PICKED_UP: { label: '已取餐', color: 'bg-blue-100 text-blue-800' },
-  IN_TRANSIT: { label: '配送中', color: 'bg-purple-100 text-purple-800' },
-  DELIVERED: { label: '已送达', color: 'bg-green-100 text-green-800' }
+  READY_FOR_PICKUP: { label: 'Ready for pickup', color: 'bg-orange-100 text-orange-800' },
+  PICKED_UP: { label: 'Picked up', color: 'bg-blue-100 text-blue-800' },
+  IN_TRANSIT: { label: 'In transit', color: 'bg-purple-100 text-purple-800' },
+  DELIVERED: { label: 'Delivered', color: 'bg-green-100 text-green-800' }
 };
 
 const DriverDashboard = () => {
@@ -32,7 +32,7 @@ const DriverDashboard = () => {
     }
 
     if (user.role !== 'DRIVER') {
-      setError('您没有权限访问此页面。此页面仅供配送骑手使用。');
+  setError('You do not have permission to access this page. This page is for drivers only.');
       setLoading(false);
       return;
     }
@@ -48,7 +48,7 @@ const DriverDashboard = () => {
       setError('');
     } catch (err) {
       console.error('Failed to fetch orders:', err);
-      setError(err.response?.data?.message || '获取订单列表失败');
+  setError(err.response?.data?.message || 'Failed to fetch orders');
     } finally {
       setLoading(false);
     }
@@ -57,18 +57,18 @@ const DriverDashboard = () => {
   const acceptOrder = async (orderId) => {
     try {
       await deliveryService.acceptOrder(orderId);
-      toast.success('接单成功');
+  toast.success('Order accepted');
       await fetchAvailableOrders();
     } catch (err) {
       console.error('Failed to accept order:', err);
-      toast.error(err.response?.data?.message || '接单失败');
+  toast.error(err.response?.data?.message || 'Failed to accept order');
     }
   };
 
   const formatDate = (dateString) => {
     if (!dateString) return '-';
     const date = new Date(dateString);
-    return date.toLocaleString('zh-CN', {
+    return date.toLocaleString('en-US', {
       month: '2-digit',
       day: '2-digit',
       hour: '2-digit',
@@ -154,7 +154,7 @@ const DriverDashboard = () => {
             onClick={() => navigate('/')}
             className="mt-4 bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700"
           >
-            返回首页
+            Back to home
           </button>
         </div>
       </div>
@@ -166,12 +166,12 @@ const DriverDashboard = () => {
       <div className="bg-gradient-to-r from-blue-500 to-blue-700 rounded-lg shadow-md p-6 mb-6 text-white">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">可接订单列表</h1>
-            <p className="mt-1 opacity-90">查看附近可接订单并快速接单</p>
+            <h1 className="text-3xl font-bold">Available orders</h1>
+            <p className="mt-1 opacity-90">View nearby orders and accept quickly</p>
           </div>
           <div className="text-right">
             <Package className="w-12 h-12 mb-2 mx-auto" />
-            <div className="text-sm opacity-90">在线接单中</div>
+            <div className="text-sm opacity-90">Online and accepting</div>
           </div>
         </div>
       </div>
@@ -180,12 +180,12 @@ const DriverDashboard = () => {
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="flex items-center gap-2 text-gray-700">
             <Filter className="w-4 h-4" />
-            <span className="text-sm font-medium">筛选/排序</span>
+            <span className="text-sm font-medium">Filter / sort</span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-5 gap-3 w-full md:w-auto">
             <input
               type="text"
-              placeholder="搜索餐厅/客户/地址"
+              placeholder="Search restaurant/customer/address"
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
               className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
@@ -194,7 +194,7 @@ const DriverDashboard = () => {
               type="number"
               min="0"
               step="0.1"
-              placeholder="最低配送费"
+              placeholder="Min delivery fee"
               value={minFee}
               onChange={(event) => setMinFee(event.target.value)}
               className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
@@ -203,7 +203,7 @@ const DriverDashboard = () => {
               type="number"
               min="0"
               step="0.1"
-              placeholder="最高配送费"
+              placeholder="Max delivery fee"
               value={maxFee}
               onChange={(event) => setMaxFee(event.target.value)}
               className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
@@ -213,21 +213,21 @@ const DriverDashboard = () => {
               onChange={(event) => setSortKey(event.target.value)}
               className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
             >
-              <option value="createdDesc">最新订单</option>
-              <option value="createdAsc">最早订单</option>
-              <option value="feeDesc">配送费从高到低</option>
-              <option value="feeAsc">配送费从低到高</option>
+              <option value="createdDesc">Newest orders</option>
+              <option value="createdAsc">Oldest orders</option>
+              <option value="feeDesc">Delivery fee: high to low</option>
+              <option value="feeAsc">Delivery fee: low to high</option>
             </select>
             <select
               value={statusFilter}
               onChange={(event) => setStatusFilter(event.target.value)}
               className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
             >
-              <option value="ALL">全部状态</option>
-              <option value="READY_FOR_PICKUP">待取餐</option>
-              <option value="PICKED_UP">已取餐</option>
-              <option value="IN_TRANSIT">配送中</option>
-              <option value="DELIVERED">已送达</option>
+              <option value="ALL">All statuses</option>
+              <option value="READY_FOR_PICKUP">Ready for pickup</option>
+              <option value="PICKED_UP">Picked up</option>
+              <option value="IN_TRANSIT">In transit</option>
+              <option value="DELIVERED">Delivered</option>
             </select>
           </div>
         </div>
@@ -235,15 +235,15 @@ const DriverDashboard = () => {
 
       <div className="bg-white rounded-lg shadow-md">
         <div className="p-6 border-b border-gray-200">
-          <h2 className="text-xl font-bold text-gray-900">可配送订单</h2>
-          <p className="text-gray-600 text-sm mt-1">接单并完成配送任务</p>
+          <h2 className="text-xl font-bold text-gray-900">Orders to deliver</h2>
+          <p className="text-gray-600 text-sm mt-1">Accept orders and complete deliveries</p>
         </div>
 
         {filteredOrders.length === 0 ? (
           <div className="p-12 text-center">
             <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">暂无可接订单</h3>
-            <p className="text-gray-600">当前没有待配送的订单，请稍后再试</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No available orders</h3>
+            <p className="text-gray-600">There are no orders to deliver right now. Please try again later.</p>
           </div>
         ) : (
           <div className="divide-y divide-gray-200">
@@ -252,7 +252,7 @@ const DriverDashboard = () => {
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-3">
-                      <h3 className="text-lg font-semibold text-gray-900">订单 #{order.orderNumber}</h3>
+                      <h3 className="text-lg font-semibold text-gray-900">Order #{order.orderNumber}</h3>
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusMap[order.orderStatus]?.color || 'bg-gray-100 text-gray-800'}`}>
                         {statusMap[order.orderStatus]?.label || order.orderStatus}
                       </span>
@@ -262,7 +262,7 @@ const DriverDashboard = () => {
                       <div className="flex items-start gap-2">
                         <MapPin className="w-4 h-4 text-gray-400 mt-0.5" />
                         <div>
-                          <div className="text-sm font-medium text-gray-900">取餐地址</div>
+                          <div className="text-sm font-medium text-gray-900">Pickup address</div>
                           <div className="text-sm text-gray-600">{order.restaurantName}</div>
                           <div className="text-sm text-gray-600">{order.restaurantAddress}</div>
                         </div>
@@ -270,7 +270,7 @@ const DriverDashboard = () => {
                       <div className="flex items-start gap-2">
                         <MapPin className="w-4 h-4 text-red-400 mt-0.5" />
                         <div>
-                          <div className="text-sm font-medium text-gray-900">送餐地址</div>
+                          <div className="text-sm font-medium text-gray-900">Drop-off address</div>
                           <div className="text-sm text-gray-600">
                             {order.deliveryStreet} {order.deliveryCity} {order.deliveryState} {order.deliveryZipCode}
                           </div>
@@ -280,16 +280,16 @@ const DriverDashboard = () => {
                     </div>
 
                     {order.specialInstructions && (
-                      <div className="text-sm text-orange-600 mb-2">备注：{order.specialInstructions}</div>
+                      <div className="text-sm text-orange-600 mb-2">Note: {order.specialInstructions}</div>
                     )}
 
                     <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
-                      <span>下单时间: {formatDate(order.createdAt)}</span>
+                      <span>Ordered at: {formatDate(order.createdAt)}</span>
                       <div className="flex items-center gap-1">
                         <DollarSign className="w-4 h-4" />
-                        <span>配送费: ¥{Number(order.deliveryFee || 0).toFixed(2)}</span>
+                        <span>Delivery fee: ¥{Number(order.deliveryFee || 0).toFixed(2)}</span>
                       </div>
-                      <span>订单金额: ¥{Number(order.totalAmount || 0).toFixed(2)}</span>
+                      <span>Order total: ¥{Number(order.totalAmount || 0).toFixed(2)}</span>
                     </div>
                   </div>
 
@@ -304,20 +304,20 @@ const DriverDashboard = () => {
                         rel="noreferrer"
                         className="px-4 py-2 bg-white text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors text-center"
                       >
-                        查看路线
+                        View route
                       </a>
                     )}
                     <button
                       onClick={() => acceptOrder(order.orderId)}
                       className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                     >
-                      接单
+                      Accept order
                     </button>
                     <button
                       onClick={() => navigate(`/orders/${order.orderId}`)}
                       className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                     >
-                      订单详情
+                      Order details
                     </button>
                   </div>
                 </div>

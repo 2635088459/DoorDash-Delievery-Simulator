@@ -27,6 +27,11 @@ export const authService = {
     const response = await api.post('/auth/register', userData);
     return response.data;
   },
+
+  testSession: async () => {
+    const response = await api.get('/auth/test');
+    return response.data;
+  },
 };
 
 export const notificationService = {
@@ -86,8 +91,8 @@ export const restaurantService = {
     const response = await api.get('/restaurants/my');
     const restaurants = response.data || [];
     if (!restaurants.length) {
-      const error = new Error('您还没有创建餐厅，请先创建餐厅');
-      error.response = { status: 404, data: { message: '您还没有创建餐厅，请先创建餐厅' } };
+      const error = new Error("You haven't created a restaurant yet. Please create one first.");
+      error.response = { status: 404, data: { message: "You haven't created a restaurant yet. Please create one first." } };
       throw error;
     }
 
@@ -168,6 +173,11 @@ export const orderService = {
     return response.data;
   },
 
+  getByIdAdmin: async (orderId) => {
+    const response = await api.get(`/orders/admin/${orderId}`);
+    return response.data;
+  },
+
   cancel: async (orderId) => {
     const response = await api.put(`/orders/${orderId}/cancel`);
     return response.data;
@@ -234,6 +244,82 @@ export const driverService = {
 
   getEarnings: async () => {
     const response = await api.get('/drivers/earnings');
+    return response.data;
+  },
+};
+
+export const ticketService = {
+  getAll: async () => {
+    const response = await api.get('/tickets');
+    return response.data;
+  },
+
+  getById: async (ticketId) => {
+    const response = await api.get(`/tickets/${ticketId}`);
+    return response.data;
+  },
+
+  create: async (payload) => {
+    const response = await api.post('/tickets', payload);
+    return response.data;
+  },
+
+  updateStatus: async (ticketId, payload) => {
+    const response = await api.put(`/tickets/${ticketId}/status`, payload);
+    return response.data;
+  },
+
+  addComment: async (ticketId, payload) => {
+    const response = await api.post(`/tickets/${ticketId}/comments`, payload);
+    return response.data;
+  },
+
+  getSamples: async (ticketId) => {
+    const response = await api.get(`/tickets/${ticketId}/samples`);
+    return response.data;
+  },
+
+  getSummary: async (ticketId) => {
+    const response = await api.get(`/tickets/${ticketId}/summary`);
+    return response.data;
+  },
+
+  executeAction: async (ticketId, payload) => {
+    const response = await api.post(`/tickets/${ticketId}/actions`, payload);
+    return response.data;
+  },
+
+  getActionLogs: async (ticketId) => {
+    const response = await api.get(`/tickets/${ticketId}/actions/logs`);
+    return response.data;
+  },
+
+  updateActionResult: async (ticketId, actionId, payload) => {
+    const response = await api.patch(`/tickets/${ticketId}/actions/${actionId}`, payload);
+    return response.data;
+  },
+
+  getAllActionLogs: async () => {
+    const response = await api.get('/tickets/actions/logs');
+    return response.data;
+  },
+};
+
+export const userAdminService = {
+  getAll: async () => {
+    const response = await api.get('/users');
+    return response.data;
+  },
+
+  updateRole: async (userId, payload) => {
+    const response = await api.patch(`/users/${userId}/role`, payload);
+    return response.data;
+  },
+
+  toggleStatus: async (userId, isActive) => {
+    const response = await api.patch(`/users/${userId}/status`, null, {
+      params: { isActive },
+    });
     return response.data;
   },
 };

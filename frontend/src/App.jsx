@@ -19,6 +19,11 @@ import RestaurantHome from './pages/RestaurantHome';
 import DriverDashboard from './pages/DriverDashboard';
 import DriverHome from './pages/DriverHome';
 import DriverDeliveries from './pages/DriverDeliveries';
+import AdminTickets from './pages/AdminTickets';
+import AdminTicketDetail from './pages/AdminTicketDetail';
+import AdminOrderDetail from './pages/AdminOrderDetail';
+import AdminUsers from './pages/AdminUsers';
+import AdminAuditLogs from './pages/AdminAuditLogs';
 import MenuManagement from './pages/MenuManagement';
 import BusinessHours from './pages/BusinessHours';
 import Reports from './pages/Reports';
@@ -75,6 +80,13 @@ function App() {
           {/* Driver Routes */}
           <Route path="/driver-dashboard" element={<PrivateRoute><DriverDashboard /></PrivateRoute>} />
           <Route path="/driver-deliveries" element={<PrivateRoute><DriverDeliveries /></PrivateRoute>} />
+
+          {/* Admin Routes */}
+          <Route path="/admin/tickets" element={<PrivateRoute><AdminTickets /></PrivateRoute>} />
+          <Route path="/admin/tickets/:id" element={<PrivateRoute><AdminTicketDetail /></PrivateRoute>} />
+          <Route path="/admin/orders/:id" element={<PrivateRoute><AdminOrderDetail /></PrivateRoute>} />
+          <Route path="/admin/users" element={<PrivateRoute><AdminUsers /></PrivateRoute>} />
+          <Route path="/admin/audit" element={<PrivateRoute><AdminAuditLogs /></PrivateRoute>} />
           
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />

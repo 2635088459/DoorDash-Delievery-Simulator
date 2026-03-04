@@ -5,10 +5,10 @@ import { MapPin, Package, Truck, Clock } from 'lucide-react';
 import { deliveryService } from '../services/apiService';
 
 const statusMap = {
-  READY_FOR_PICKUP: { label: '待取餐', color: 'bg-orange-100 text-orange-800', action: 'pickedUp', actionLabel: '已取餐' },
-  PICKED_UP: { label: '已取餐', color: 'bg-blue-100 text-blue-800', action: 'inTransit', actionLabel: '开始配送' },
-  IN_TRANSIT: { label: '配送中', color: 'bg-purple-100 text-purple-800', action: 'delivered', actionLabel: '完成配送' },
-  DELIVERED: { label: '已送达', color: 'bg-green-100 text-green-800' },
+  READY_FOR_PICKUP: { label: 'Ready for pickup', color: 'bg-orange-100 text-orange-800', action: 'pickedUp', actionLabel: 'Picked up' },
+  PICKED_UP: { label: 'Picked up', color: 'bg-blue-100 text-blue-800', action: 'inTransit', actionLabel: 'Start delivery' },
+  IN_TRANSIT: { label: 'In transit', color: 'bg-purple-100 text-purple-800', action: 'delivered', actionLabel: 'Complete delivery' },
+  DELIVERED: { label: 'Delivered', color: 'bg-green-100 text-green-800' },
 };
 
 const DriverDeliveries = () => {
@@ -27,7 +27,7 @@ const DriverDeliveries = () => {
     }
 
     if (user.role !== 'DRIVER') {
-      setError('您没有权限访问此页面。此页面仅供配送骑手使用。');
+      setError('You do not have permission to access this page. This page is for drivers only.');
       setLoading(false);
       return;
     }
@@ -43,7 +43,7 @@ const DriverDeliveries = () => {
       setError('');
     } catch (err) {
       console.error('Failed to load deliveries:', err);
-      setError(err.response?.data?.message || '获取配送订单失败');
+      setError(err.response?.data?.message || 'Failed to load deliveries');
     } finally {
       setLoading(false);
     }
@@ -58,11 +58,11 @@ const DriverDeliveries = () => {
       } else if (action === 'delivered') {
         await deliveryService.markDelivered(orderId);
       }
-      toast.success('配送状态已更新');
+      toast.success('Delivery status updated');
       await loadDeliveries();
     } catch (err) {
       console.error('Failed to update delivery status:', err);
-      toast.error(err.response?.data?.message || '更新配送状态失败');
+      toast.error(err.response?.data?.message || 'Failed to update delivery status');
     }
   };
 
@@ -79,7 +79,7 @@ const DriverDeliveries = () => {
   const formatDate = (dateString) => {
     if (!dateString) return '-';
     const date = new Date(dateString);
-    return date.toLocaleString('zh-CN', {
+    return date.toLocaleString('en-US', {
       month: '2-digit',
       day: '2-digit',
       hour: '2-digit',
@@ -111,7 +111,7 @@ const DriverDeliveries = () => {
             onClick={() => navigate('/')}
             className="mt-4 bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700"
           >
-            返回首页
+            Back to home
           </button>
         </div>
       </div>
@@ -123,12 +123,12 @@ const DriverDeliveries = () => {
       <div className="bg-gradient-to-r from-blue-500 to-blue-700 rounded-lg shadow-md p-6 mb-6 text-white">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">我的配送</h1>
-            <p className="mt-1 opacity-90">跟踪当前配送进度</p>
+            <h1 className="text-3xl font-bold">My deliveries</h1>
+            <p className="mt-1 opacity-90">Track your current delivery progress</p>
           </div>
           <div className="text-right">
             <Truck className="w-12 h-12 mb-2 mx-auto" />
-            <div className="text-sm opacity-90">配送中</div>
+            <div className="text-sm opacity-90">Delivering</div>
           </div>
         </div>
       </div>
@@ -137,14 +137,14 @@ const DriverDeliveries = () => {
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-white rounded-lg shadow-md">
             <div className="p-6 border-b border-gray-200">
-              <h2 className="text-xl font-bold text-gray-900">当前配送</h2>
-              <p className="text-gray-600 text-sm mt-1">进行中的订单</p>
+              <h2 className="text-xl font-bold text-gray-900">Current deliveries</h2>
+              <p className="text-gray-600 text-sm mt-1">Orders in progress</p>
             </div>
 
             {currentDeliveries.length === 0 ? (
               <div className="p-10 text-center">
                 <Package className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-600">暂无进行中的配送</p>
+                <p className="text-gray-600">No deliveries in progress</p>
               </div>
             ) : (
               <div className="divide-y divide-gray-200">
@@ -153,7 +153,7 @@ const DriverDeliveries = () => {
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-3">
-                          <h3 className="text-lg font-semibold text-gray-900">订单 #{delivery.orderNumber}</h3>
+                          <h3 className="text-lg font-semibold text-gray-900">Order #{delivery.orderNumber}</h3>
                           <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusMap[delivery.orderStatus]?.color || 'bg-gray-100 text-gray-800'}`}>
                             {statusMap[delivery.orderStatus]?.label || delivery.orderStatus}
                           </span>
@@ -162,7 +162,7 @@ const DriverDeliveries = () => {
                           <div className="flex items-start gap-2">
                             <MapPin className="w-4 h-4 text-gray-400 mt-0.5" />
                             <div>
-                              <div className="text-sm font-medium text-gray-900">取餐地址</div>
+                              <div className="text-sm font-medium text-gray-900">Pickup address</div>
                               <div className="text-sm text-gray-600">{delivery.restaurantName}</div>
                               <div className="text-sm text-gray-600">{delivery.restaurantAddress}</div>
                             </div>
@@ -170,7 +170,7 @@ const DriverDeliveries = () => {
                           <div className="flex items-start gap-2">
                             <MapPin className="w-4 h-4 text-red-400 mt-0.5" />
                             <div>
-                              <div className="text-sm font-medium text-gray-900">送餐地址</div>
+                              <div className="text-sm font-medium text-gray-900">Drop-off address</div>
                               <div className="text-sm text-gray-600">
                                 {delivery.deliveryStreet} {delivery.deliveryCity} {delivery.deliveryState} {delivery.deliveryZipCode}
                               </div>
@@ -179,11 +179,11 @@ const DriverDeliveries = () => {
                           </div>
                         </div>
                         {delivery.specialInstructions && (
-                          <div className="text-sm text-orange-600 mb-2">备注：{delivery.specialInstructions}</div>
+                          <div className="text-sm text-orange-600 mb-2">Notes: {delivery.specialInstructions}</div>
                         )}
                         <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
-                          <span>下单时间: {formatDate(delivery.createdAt)}</span>
-                          <span>预计送达: {formatDate(delivery.estimatedDelivery)}</span>
+                          <span>Placed at: {formatDate(delivery.createdAt)}</span>
+                          <span>Estimated delivery: {formatDate(delivery.estimatedDelivery)}</span>
                         </div>
                       </div>
                       <div className="flex flex-col gap-2">
@@ -200,7 +200,7 @@ const DriverDeliveries = () => {
                             rel="noreferrer"
                             className="px-4 py-2 bg-white text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors text-center"
                           >
-                            查看路线
+                            View route
                           </a>
                         )}
                         {statusMap[delivery.orderStatus]?.action && (
@@ -223,17 +223,17 @@ const DriverDeliveries = () => {
         <div className="space-y-6">
           <div className="bg-white rounded-lg shadow-md">
             <div className="p-6 border-b border-gray-200">
-              <h2 className="text-lg font-bold text-gray-900">今日完成</h2>
+              <h2 className="text-lg font-bold text-gray-900">Completed today</h2>
             </div>
             <div className="p-6">
               {completedDeliveries.length === 0 ? (
-                <p className="text-sm text-gray-600">暂无已完成配送</p>
+                <p className="text-sm text-gray-600">No completed deliveries yet</p>
               ) : (
                 <ul className="space-y-4">
                   {completedDeliveries.slice(0, 5).map((delivery) => (
                     <li key={delivery.orderId} className="text-sm text-gray-600">
-                      <div className="font-medium text-gray-900">订单 #{delivery.orderNumber}</div>
-                      <div>完成时间: {formatDate(delivery.actualDelivery)}</div>
+                      <div className="font-medium text-gray-900">Order #{delivery.orderNumber}</div>
+                      <div>Completed at: {formatDate(delivery.actualDelivery)}</div>
                     </li>
                   ))}
                 </ul>
@@ -245,8 +245,8 @@ const DriverDeliveries = () => {
             <div className="flex items-start gap-3">
               <Clock className="w-5 h-5 text-blue-600" />
               <div>
-                <div className="text-sm font-semibold text-blue-900">配送提醒</div>
-                <p className="text-sm text-blue-800 mt-1">确保及时取餐并安全送达。</p>
+                <div className="text-sm font-semibold text-blue-900">Delivery reminder</div>
+                <p className="text-sm text-blue-800 mt-1">Pick up on time and deliver safely.</p>
               </div>
             </div>
           </div>

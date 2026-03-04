@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -74,6 +75,70 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      */
     @Query("SELECT o FROM Order o WHERE o.restaurant.id = :restaurantId AND o.status = :status ORDER BY o.createdAt DESC")
     List<Order> findByRestaurantIdAndStatus(@Param("restaurantId") Long restaurantId, @Param("status") OrderStatus status);
+
+    @Query("SELECT COUNT(o) FROM Order o WHERE o.restaurant.id = :restaurantId AND o.createdAt >= :since")
+    Long countRecentOrdersByRestaurant(@Param("restaurantId") Long restaurantId, @Param("since") LocalDateTime since);
+
+    @Query("SELECT COUNT(o) FROM Order o WHERE o.restaurant.id = :restaurantId AND o.status = :status AND o.createdAt >= :since")
+    Long countRecentOrdersByRestaurantAndStatus(
+        @Param("restaurantId") Long restaurantId,
+        @Param("status") OrderStatus status,
+        @Param("since") LocalDateTime since
+    );
+
+    @Query(value = "SELECT COUNT(*) FROM orders o WHERE o.restaurant_id = :restaurantId " +
+        "AND o.actual_delivery IS NOT NULL AND o.estimated_delivery IS NOT NULL " +
+        "AND o.actual_delivery > o.estimated_delivery AND o.created_at >= :since",
+        nativeQuery = true)
+    Long countRecentDelayedOrdersByRestaurant(
+        @Param("restaurantId") Long restaurantId,
+        @Param("since") LocalDateTime since
+    );
+
+    @Query(value = "SELECT COUNT(*) FROM orders o WHERE o.restaurant_id = :restaurantId " +
+        "AND o.actual_delivery IS NOT NULL AND o.estimated_delivery IS NOT NULL " +
+        "AND o.actual_delivery > (o.estimated_delivery + interval '30 minutes') " +
+        "AND o.created_at >= :since",
+        nativeQuery = true)
+    Long countRecentTimeoutOrdersByRestaurant(
+        @Param("restaurantId") Long restaurantId,
+        @Param("since") LocalDateTime since
+    );
+
+    @Query(value = "SELECT AVG(EXTRACT(EPOCH FROM (o.actual_delivery - o.estimated_delivery)) / 60) " +
+        "FROM orders o WHERE o.restaurant_id = :restaurantId " +
+        "AND o.actual_delivery IS NOT NULL AND o.estimated_delivery IS NOT NULL " +
+        "AND o.actual_delivery > o.estimated_delivery AND o.created_at >= :since",
+        nativeQuery = true)
+    Double avgDelayMinutesByRestaurant(
+        @Param("restaurantId") Long restaurantId,
+        @Param("since") LocalDateTime since
+    );
+
+    @Query("SELECT COUNT(o) FROM Order o WHERE o.restaurant.id = :restaurantId " +
+           "AND o.paymentStatus = :status AND o.createdAt >= :since")
+    Long countRecentRefundedOrdersByRestaurant(
+        @Param("restaurantId") Long restaurantId,
+        @Param("status") Order.PaymentStatus status,
+        @Param("since") LocalDateTime since
+    );
+
+    @Query("SELECT COUNT(o) FROM Order o WHERE o.restaurant.id = :restaurantId " +
+           "AND o.createdAt >= :start AND o.createdAt < :end")
+    Long countOrdersByRestaurantBetween(
+        @Param("restaurantId") Long restaurantId,
+        @Param("start") LocalDateTime start,
+        @Param("end") LocalDateTime end
+    );
+
+    @Query("SELECT COUNT(o) FROM Order o WHERE o.restaurant.id = :restaurantId " +
+           "AND o.status = :status AND o.createdAt >= :start AND o.createdAt < :end")
+    Long countOrdersByRestaurantAndStatusBetween(
+        @Param("restaurantId") Long restaurantId,
+        @Param("status") OrderStatus status,
+        @Param("start") LocalDateTime start,
+        @Param("end") LocalDateTime end
+    );
     
     /**
      * Check if an order exists for a specific customer
@@ -104,6 +169,15 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * Used by: DRIVER role to filter their deliveries
      */
     List<Order> findByDriverAndStatus(User driver, OrderStatus status);
+
+    List<Order> findTop10ByRestaurantIdOrderByCreatedAtDesc(Long restaurantId);
+
+    List<Order> findTop10ByRestaurantIdAndStatusOrderByCreatedAtDesc(Long restaurantId, OrderStatus status);
+
+    List<Order> findTop10ByRestaurantIdAndPaymentStatusOrderByCreatedAtDesc(
+        Long restaurantId,
+        Order.PaymentStatus paymentStatus
+    );
 
     /**
      * Count driver's delivered orders for today

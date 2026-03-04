@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Bell, Check, CheckCheck, Trash2, AlertCircle } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 import useNotificationStore from '../store/notificationStore';
 import { notificationService } from '../services/apiService';
 import toast from 'react-hot-toast';
@@ -60,10 +60,10 @@ const Notifications = () => {
     try {
       await notificationService.markAsRead(notificationId);
       markAsRead(notificationId);
-      toast.success('已标记为已读');
+  toast.success('Marked as read');
     } catch (error) {
       console.error('Error marking notification as read:', error);
-      toast.error('操作失败');
+  toast.error('Operation failed');
     }
   };
 
@@ -72,28 +72,28 @@ const Notifications = () => {
     try {
       await notificationService.markAllAsRead();
       markAllAsRead();
-      toast.success('已全部标记为已读');
+  toast.success('All marked as read');
     } catch (error) {
       console.error('Error marking all as read:', error);
-      toast.error('操作失败');
+  toast.error('Operation failed');
     } finally {
       setLoading(false);
     }
   };
 
   const handleClearAll = () => {
-    if (window.confirm('确定要清空所有通知吗？')) {
+  if (window.confirm('Are you sure you want to clear all notifications?')) {
       clearNotifications();
-      toast.success('通知已清空');
+  toast.success('Notifications cleared');
     }
   };
 
   const formatTime = (dateString) => {
     try {
       const date = new Date(dateString);
-      return formatDistanceToNow(date, { addSuffix: true, locale: zhCN });
+  return formatDistanceToNow(date, { addSuffix: true, locale: enUS });
     } catch {
-      return '刚刚';
+  return 'Just now';
     }
   };
 
@@ -104,9 +104,9 @@ const Notifications = () => {
         <div className="flex items-center space-x-3">
           <Bell className="w-8 h-8 text-primary-600" />
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">通知中心</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Notifications</h1>
             <p className="text-sm text-gray-600 mt-1">
-              {unreadCount} 条未读通知
+              {unreadCount} unread notification{unreadCount === 1 ? '' : 's'}
             </p>
           </div>
         </div>
@@ -120,7 +120,7 @@ const Notifications = () => {
               className="btn btn-outline flex items-center space-x-2"
             >
               <CheckCheck className="w-4 h-4" />
-              <span className="hidden sm:inline">全部已读</span>
+              <span className="hidden sm:inline">Mark all read</span>
             </button>
           )}
           {notifications.length > 0 && (
@@ -129,7 +129,7 @@ const Notifications = () => {
               className="btn btn-secondary flex items-center space-x-2"
             >
               <Trash2 className="w-4 h-4" />
-              <span className="hidden sm:inline">清空</span>
+              <span className="hidden sm:inline">Clear</span>
             </button>
           )}
         </div>
@@ -139,9 +139,9 @@ const Notifications = () => {
       {notifications.length === 0 ? (
         <div className="text-center py-12">
           <Bell className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <p className="text-gray-500 text-lg">暂无通知</p>
+          <p className="text-gray-500 text-lg">No notifications</p>
           <p className="text-gray-400 text-sm mt-2">
-            您的通知将在这里显示
+            Your notifications will appear here.
           </p>
         </div>
       ) : (
@@ -190,7 +190,7 @@ const Notifications = () => {
                         className="flex items-center space-x-1 text-primary-600 hover:text-primary-700 text-sm font-medium"
                       >
                         <Check className="w-4 h-4" />
-                        <span>标记已读</span>
+                        <span>Mark as read</span>
                       </button>
                     )}
                   </div>
@@ -206,10 +206,10 @@ const Notifications = () => {
         <div className="flex items-start">
           <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 mr-3" />
           <div className="text-sm text-blue-800">
-            <p className="font-medium mb-1">关于通知</p>
+            <p className="font-medium mb-1">About notifications</p>
             <p className="text-blue-700">
-              您将实时收到订单状态更新、配送进度、支付确认等重要通知。
-              未读通知会在导航栏显示数量提醒。
+              You will receive real-time updates on order status, delivery progress, and payment confirmations.
+              Unread counts appear in the navigation bar.
             </p>
           </div>
         </div>

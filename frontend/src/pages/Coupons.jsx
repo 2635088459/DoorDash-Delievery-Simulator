@@ -6,15 +6,15 @@ const Coupons = () => {
   return (
     <div className="max-w-5xl mx-auto p-6">
       <div className="bg-white rounded-lg shadow-md p-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">优惠券管理</h1>
-        <p className="text-gray-600 mb-6">优惠券功能还在开发中，正在规划创建与投放流程。</p>
+  <h1 className="text-3xl font-bold text-gray-900 mb-2">Coupon Management</h1>
+  <p className="text-gray-600 mb-6">Coupon features are under development. We are planning creation and distribution workflows.</p>
 
         <div className="bg-pink-50 border border-pink-200 rounded-lg p-4 mb-6">
-          <h2 className="text-lg font-semibold text-pink-900 mb-2">计划支持</h2>
+          <h2 className="text-lg font-semibold text-pink-900 mb-2">Planned support</h2>
           <ul className="text-pink-800 space-y-1">
-            <li>• 新客优惠券</li>
-            <li>• 满减与折扣券</li>
-            <li>• 限时活动与投放分析</li>
+            <li>• New customer coupons</li>
+            <li>• Threshold discounts and percentage off</li>
+            <li>• Limited-time campaigns and distribution analytics</li>
           </ul>
         </div>
 
@@ -22,7 +22,7 @@ const Coupons = () => {
           onClick={() => navigate('/restaurant-home')}
           className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
         >
-          返回餐厅首页
+          Back to restaurant home
         </button>
       </div>
     </div>

@@ -30,15 +30,15 @@ const MenuManagement = () => {
 
   const formTitle = useMemo(() => {
     if (isEditing) {
-      return `编辑菜品 #${editingItem?.id}`;
+  return `Edit item #${editingItem?.id}`;
     }
-    return '新增菜品';
+  return 'Add menu item';
   }, [isEditing, editingItem]);
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     if (user.role !== 'RESTAURANT_OWNER') {
-      setError('您没有权限访问此页面。此页面仅供餐厅老板使用。');
+  setError('You do not have permission to access this page. This page is for restaurant owners only.');
       setLoading(false);
       return;
     }
@@ -53,7 +53,7 @@ const MenuManagement = () => {
         setError('');
       } catch (err) {
         console.error('Failed to load menu items:', err);
-        setError(err.response?.data?.message || '加载菜品失败');
+  setError(err.response?.data?.message || 'Failed to load menu items');
       } finally {
         setLoading(false);
       }
@@ -85,12 +85,12 @@ const MenuManagement = () => {
     const file = event.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) {
-      toast.error('请上传图片文件');
+  toast.error('Please upload an image file');
       return;
     }
     const maxSizeMb = 2;
     if (file.size > maxSizeMb * 1024 * 1024) {
-      toast.error(`图片大小不能超过 ${maxSizeMb}MB`);
+  toast.error(`Image size cannot exceed ${maxSizeMb}MB`);
       return;
     }
 
@@ -102,13 +102,13 @@ const MenuManagement = () => {
           ...prev,
           imageUrl: uploadResult.url,
         }));
-        toast.success('图片上传成功');
+  toast.success('Image uploaded');
       } else {
-        toast.error('图片上传失败，请重试');
+  toast.error('Image upload failed, please try again');
       }
     } catch (err) {
       console.error('Failed to upload image:', err);
-      toast.error(err.response?.data?.message || '图片上传失败');
+  toast.error(err.response?.data?.message || 'Image upload failed');
     } finally {
       setImageUploading(false);
       event.target.value = '';
@@ -158,30 +158,30 @@ const MenuManagement = () => {
       setSaving(true);
       if (isEditing) {
         await menuItemService.update(editingItem.id, payload);
-        toast.success('菜品已更新');
+  toast.success('Menu item updated');
       } else {
         await menuItemService.create({ ...payload, restaurantId: restaurant.id });
-        toast.success('菜品已创建');
+  toast.success('Menu item created');
       }
       await refreshMenu();
       resetForm();
     } catch (err) {
       console.error('Failed to save menu item:', err);
-      toast.error(err.response?.data?.message || '保存菜品失败');
+  toast.error(err.response?.data?.message || 'Failed to save menu item');
     } finally {
       setSaving(false);
     }
   };
 
   const handleDelete = async (itemId) => {
-    if (!confirm('确定要删除这个菜品吗？')) return;
+  if (!confirm('Are you sure you want to delete this menu item?')) return;
     try {
       await menuItemService.remove(itemId);
-      toast.success('菜品已删除');
+  toast.success('Menu item deleted');
       await refreshMenu();
     } catch (err) {
       console.error('Failed to delete menu item:', err);
-      toast.error(err.response?.data?.message || '删除菜品失败');
+  toast.error(err.response?.data?.message || 'Failed to delete menu item');
     }
   };
 
@@ -191,7 +191,7 @@ const MenuManagement = () => {
       await refreshMenu();
     } catch (err) {
       console.error('Failed to toggle availability:', err);
-      toast.error(err.response?.data?.message || '更新状态失败');
+  toast.error(err.response?.data?.message || 'Failed to update status');
     }
   };
 
@@ -212,7 +212,7 @@ const MenuManagement = () => {
             onClick={() => navigate('/')}
             className="mt-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
           >
-            返回首页
+            Back to home
           </button>
         </div>
       </div>
@@ -229,7 +229,7 @@ const MenuManagement = () => {
               <p className="text-gray-600 mt-1">{restaurant.cuisine} • {restaurant.address}</p>
             </div>
             <div className="text-right">
-              <div className="text-sm text-gray-500">餐厅 ID</div>
+              <div className="text-sm text-gray-500">Restaurant ID</div>
               <div className="text-lg font-semibold text-gray-900">#{restaurant.id}</div>
             </div>
           </div>
@@ -242,7 +242,7 @@ const MenuManagement = () => {
             <h2 className="text-xl font-bold text-gray-900 mb-4">{formTitle}</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">菜品名称</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Item name</label>
                 <input
                   type="text"
                   name="name"
@@ -254,7 +254,7 @@ const MenuManagement = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">分类</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
                 <input
                   type="text"
                   name="category"
@@ -266,7 +266,7 @@ const MenuManagement = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">价格 (¥)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Price (¥)</label>
                 <input
                   type="number"
                   name="price"
@@ -280,7 +280,7 @@ const MenuManagement = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">上传图片</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Upload image</label>
                 <input
                   type="file"
                   accept="image/*"
@@ -289,13 +289,13 @@ const MenuManagement = () => {
                   className="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-red-50 file:text-red-700 hover:file:bg-red-100"
                 />
                 <p className="text-xs text-gray-500 mt-2">
-                  {imageUploading ? '上传中，请稍候...' : '支持 JPG/PNG，最大 2MB'}
+                  {imageUploading ? 'Uploading, please wait...' : 'Supports JPG/PNG, max 2MB'}
                 </p>
                 {formState.imageUrl && (
                   <div className="mt-3 border border-gray-200 rounded-lg p-3 bg-gray-50">
                     <img
                       src={formState.imageUrl}
-                      alt="菜单预览"
+                      alt="Menu preview"
                       className="w-full h-40 object-cover rounded-md"
                     />
                     <button
@@ -303,14 +303,14 @@ const MenuManagement = () => {
                       onClick={handleClearImage}
                       className="mt-2 text-sm text-red-600 hover:text-red-700"
                     >
-                      移除图片
+                      Remove image
                     </button>
                   </div>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">描述</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                 <textarea
                   name="description"
                   value={formState.description}
@@ -329,7 +329,7 @@ const MenuManagement = () => {
                     onChange={handleChange}
                     className="rounded border-gray-300 text-red-600"
                   />
-                  可售
+                  Available
                 </label>
                 <label className="flex items-center gap-2 text-sm text-gray-700">
                   <input
@@ -339,7 +339,7 @@ const MenuManagement = () => {
                     onChange={handleChange}
                     className="rounded border-gray-300 text-red-600"
                   />
-                  素食
+                  Vegetarian
                 </label>
                 <label className="flex items-center gap-2 text-sm text-gray-700">
                   <input
@@ -349,10 +349,10 @@ const MenuManagement = () => {
                     onChange={handleChange}
                     className="rounded border-gray-300 text-red-600"
                   />
-                  纯素
+                  Vegan
                 </label>
                 <div>
-                  <label className="block text-sm text-gray-700 mb-1">辣度</label>
+                  <label className="block text-sm text-gray-700 mb-1">Spice level</label>
                   <input
                     type="number"
                     name="spicyLevel"
@@ -371,7 +371,7 @@ const MenuManagement = () => {
                   disabled={saving}
                   className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 disabled:opacity-60"
                 >
-                  {saving ? '保存中...' : isEditing ? '保存修改' : '创建菜品'}
+                  {saving ? 'Saving...' : isEditing ? 'Save changes' : 'Create item'}
                 </button>
                 {isEditing && (
                   <button
@@ -379,7 +379,7 @@ const MenuManagement = () => {
                     onClick={resetForm}
                     className="bg-white text-gray-700 px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50"
                   >
-                    取消编辑
+                    Cancel edit
                   </button>
                 )}
               </div>
@@ -390,15 +390,15 @@ const MenuManagement = () => {
         <div className="lg:col-span-2">
           <div className="bg-white rounded-lg shadow-md">
             <div className="p-6 border-b border-gray-200">
-              <h2 className="text-xl font-bold text-gray-900">菜品列表</h2>
-              <p className="text-gray-600 text-sm mt-1">管理您当前的菜单内容</p>
+              <h2 className="text-xl font-bold text-gray-900">Menu items</h2>
+              <p className="text-gray-600 text-sm mt-1">Manage your current menu</p>
             </div>
 
             {menuItems.length === 0 ? (
               <div className="p-12 text-center">
                 <div className="text-gray-400 text-6xl mb-4">🍜</div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">暂无菜品</h3>
-                <p className="text-gray-600">请先创建您的第一道菜品</p>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No menu items</h3>
+                <p className="text-gray-600">Create your first menu item to get started</p>
               </div>
             ) : (
               <div className="divide-y divide-gray-200">
@@ -411,17 +411,17 @@ const MenuManagement = () => {
                           <span
                             className={`px-3 py-1 rounded-full text-xs font-medium ${item.isAvailable ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}
                           >
-                            {item.isAvailable ? '可售' : '已下架'}
+                            {item.isAvailable ? 'Available' : 'Unavailable'}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-600 mb-2">{item.description || '暂无描述'}</p>
+                        <p className="text-sm text-gray-600 mb-2">{item.description || 'No description'}</p>
                         <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
                           <span className="font-medium text-red-600">¥{Number(item.price || 0).toFixed(2)}</span>
-                          <span className="bg-gray-100 px-2 py-1 rounded">{item.category || '未分类'}</span>
-                          {item.isVegetarian && <span className="bg-green-50 text-green-700 px-2 py-1 rounded">素食</span>}
-                          {item.isVegan && <span className="bg-emerald-50 text-emerald-700 px-2 py-1 rounded">纯素</span>}
+                          <span className="bg-gray-100 px-2 py-1 rounded">{item.category || 'Uncategorized'}</span>
+                          {item.isVegetarian && <span className="bg-green-50 text-green-700 px-2 py-1 rounded">Vegetarian</span>}
+                          {item.isVegan && <span className="bg-emerald-50 text-emerald-700 px-2 py-1 rounded">Vegan</span>}
                           {item.spicyLevel > 0 && (
-                            <span className="bg-red-50 text-red-700 px-2 py-1 rounded">辣度 {item.spicyLevel}</span>
+                            <span className="bg-red-50 text-red-700 px-2 py-1 rounded">Spice {item.spicyLevel}</span>
                           )}
                         </div>
                       </div>
@@ -431,19 +431,19 @@ const MenuManagement = () => {
                           onClick={() => handleEdit(item)}
                           className="bg-white text-gray-700 px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50"
                         >
-                          编辑
+                          Edit
                         </button>
                         <button
                           onClick={() => toggleAvailability(item)}
                           className="bg-white text-gray-700 px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50"
                         >
-                          {item.isAvailable ? '下架' : '上架'}
+                          {item.isAvailable ? 'Disable' : 'Enable'}
                         </button>
                         <button
                           onClick={() => handleDelete(item.id)}
                           className="bg-white text-red-600 px-4 py-2 rounded-lg border border-red-300 hover:bg-red-50"
                         >
-                          删除
+                          Delete
                         </button>
                       </div>
                     </div>

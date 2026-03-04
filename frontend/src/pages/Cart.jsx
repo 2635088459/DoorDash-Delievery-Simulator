@@ -20,7 +20,7 @@ const Cart = () => {
 
   const handleCheckout = () => {
     if (items.length === 0) {
-      toast.error('购物车是空的');
+  toast.error('Your cart is empty');
       return;
     }
     // TODO: 跳转到结算页面
@@ -28,9 +28,9 @@ const Cart = () => {
   };
 
   const handleClearCart = () => {
-    if (window.confirm('确定要清空购物车吗？')) {
+  if (window.confirm('Are you sure you want to clear the cart?')) {
       clearCart();
-      toast.success('购物车已清空');
+  toast.success('Cart cleared');
     }
   };
 
@@ -43,23 +43,23 @@ const Cart = () => {
             className="flex items-center text-gray-600 hover:text-gray-900"
           >
             <ArrowLeft className="w-5 h-5 mr-2" />
-            返回餐厅列表
+            Back to restaurants
           </button>
         </div>
 
         <div className="text-center py-20">
           <ShoppingCart className="w-24 h-24 text-gray-300 mx-auto mb-6" />
           <h2 className="text-2xl font-bold text-gray-700 mb-2">
-            购物车是空的
+            Your cart is empty
           </h2>
           <p className="text-gray-500 mb-8">
-            去浏览餐厅，添加一些美味的食物吧！
+            Browse restaurants and add something tasty.
           </p>
           <button
             onClick={() => navigate('/restaurants')}
             className="bg-primary-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-primary-700 transition-colors"
           >
-            浏览餐厅
+            Browse restaurants
           </button>
         </div>
       </div>
@@ -77,16 +77,16 @@ const Cart = () => {
               className="flex items-center text-gray-600 hover:text-gray-900 mr-6"
             >
               <ArrowLeft className="w-5 h-5 mr-2" />
-              继续点餐
+              Continue ordering
             </button>
-            <h1 className="text-3xl font-bold text-gray-900">购物车</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Cart</h1>
           </div>
           <button
             onClick={handleClearCart}
             className="flex items-center text-red-600 hover:text-red-700"
           >
             <Trash2 className="w-5 h-5 mr-2" />
-            清空购物车
+            Clear cart
           </button>
         </div>
 
@@ -96,7 +96,7 @@ const Cart = () => {
             <Store className="w-6 h-6 text-primary-600 mr-3" />
             <div>
               <h3 className="font-bold text-gray-900">{restaurantName}</h3>
-              <p className="text-sm text-gray-500">来自这家餐厅</p>
+              <p className="text-sm text-gray-500">From this restaurant</p>
             </div>
           </div>
         </div>
@@ -126,12 +126,12 @@ const Cart = () => {
                         </span>
                         {item.spicyLevel > 0 && (
                           <span className="text-xs px-2 py-1 bg-red-100 text-red-700 rounded">
-                            🌶️ 辣度 {item.spicyLevel}
+                            🌶️ Spice level {item.spicyLevel}
                           </span>
                         )}
                         {item.isVegetarian && (
                           <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded">
-                            🥬 素食
+                            🥬 Vegetarian
                           </span>
                         )}
                       </div>
@@ -163,7 +163,7 @@ const Cart = () => {
                         </button>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm text-gray-500">小计</p>
+                        <p className="text-sm text-gray-500">Subtotal</p>
                         <p className="text-lg font-bold text-gray-900">
                           ¥{(item.price * item.quantity).toFixed(2)}
                         </p>
@@ -178,20 +178,20 @@ const Cart = () => {
           {/* Order Summary */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-xl shadow-sm p-6 sticky top-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-6">订单摘要</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-6">Order summary</h3>
 
               <div className="space-y-4 mb-6">
                 <div className="flex justify-between text-gray-700">
-                  <span>商品总计（{getTotalItems()}件）</span>
+                  <span>Items ({getTotalItems()})</span>
                   <span>¥{getTotalPrice().toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-gray-700">
-                  <span>配送费</span>
-                  <span className="text-green-600">免费</span>
+                  <span>Delivery fee</span>
+                  <span className="text-green-600">Free</span>
                 </div>
                 <div className="border-t border-gray-200 pt-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-lg font-bold text-gray-900">总计</span>
+                    <span className="text-lg font-bold text-gray-900">Total</span>
                     <span className="text-2xl font-bold text-primary-600">
                       ¥{getTotalPrice().toFixed(2)}
                     </span>
@@ -203,11 +203,11 @@ const Cart = () => {
                 onClick={handleCheckout}
                 className="w-full bg-primary-600 text-white py-4 rounded-lg font-bold text-lg hover:bg-primary-700 transition-colors"
               >
-                去结算
+                Checkout
               </button>
 
               <p className="text-xs text-gray-500 text-center mt-4">
-                点击"去结算"即表示您同意我们的服务条款
+                By clicking "Checkout" you agree to our terms of service.
               </p>
             </div>
           </div>

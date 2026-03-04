@@ -2,6 +2,7 @@ package com.shydelivery.doordashsimulator.controller;
 
 import com.shydelivery.doordashsimulator.dto.UserDTO;
 import com.shydelivery.doordashsimulator.dto.request.CreateUserRequest;
+import com.shydelivery.doordashsimulator.dto.request.UpdateUserRoleRequest;
 import com.shydelivery.doordashsimulator.dto.request.UpdateUserRequest;
 import com.shydelivery.doordashsimulator.entity.User.UserRole;
 import com.shydelivery.doordashsimulator.service.UserService;
@@ -9,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -22,6 +24,7 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/users")
+@PreAuthorize("hasRole('ADMIN')")
 public class UserController {
     
     private final UserService userService;
@@ -160,6 +163,23 @@ public class UserController {
         UserDTO user = userService.toggleUserStatus(id, isActive);
         return ResponseEntity.ok(user);
     }
+
+    /**
+     * 更新用户角色
+     * PATCH /api/users/{id}/role
+     *
+     * @param id 用户ID
+     * @param request 角色更新请求
+     * @return 200 OK + UserDTO
+     */
+    @PatchMapping("/{id}/role")
+    public ResponseEntity<UserDTO> updateUserRole(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateUserRoleRequest request) {
+        log.info("REST request to update user role for ID: {}", id);
+        UserDTO user = userService.updateUserRole(id, request);
+        return ResponseEntity.ok(user);
+    }
     
     /**
      * 获取用户统计信息
@@ -176,6 +196,7 @@ public class UserController {
         stats.put("customerCount", userService.countUsersByRole(UserRole.CUSTOMER));
         stats.put("restaurantOwnerCount", userService.countUsersByRole(UserRole.RESTAURANT_OWNER));
         stats.put("driverCount", userService.countUsersByRole(UserRole.DRIVER));
+        stats.put("adminCount", userService.countUsersByRole(UserRole.ADMIN));
         
         return ResponseEntity.ok(stats);
     }

@@ -57,7 +57,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // 公开接口（不需要认证）
                         .requestMatchers("/auth/**").permitAll()              // 认证相关接口
-                        .requestMatchers("/users").permitAll()                // 用户注册接口
                         .requestMatchers("/error").permitAll()                // 错误页面
                         .requestMatchers("/actuator/health").permitAll()      // 健康检查
                         .requestMatchers("/swagger-ui/**").permitAll()        // Swagger UI

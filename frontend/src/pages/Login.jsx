@@ -28,20 +28,23 @@ const Login = () => {
 
     try {
       const response = await authService.login(formData.email, formData.password);
-      login(response.user, response.accessToken);
+  login(response.user, response.accessToken, response.refreshToken);
       
       // 根据用户角色跳转到不同页面
       const roleMessages = {
-        CUSTOMER: '登录成功！开始您的美食之旅',
-        RESTAURANT_OWNER: '登录成功！欢迎回到餐厅管理',
-        DRIVER: '登录成功！准备好接单了吗？'
+        CUSTOMER: 'Login successful! Start your food journey',
+        RESTAURANT_OWNER: 'Login successful! Welcome back to restaurant management',
+        DRIVER: 'Login successful! Ready to accept orders?',
+        ADMIN: 'Admin login successful! Opening the ticket board'
       };
       
-      toast.success(roleMessages[response.user.role] || '登录成功！');
+      toast.success(roleMessages[response.user.role] || 'Login successful!');
       
       // 跳转逻辑
       if (response.user.role === 'RESTAURANT_OWNER') {
         navigate('/restaurant-home');
+      } else if (response.user.role === 'ADMIN') {
+        navigate('/admin/tickets');
       } else if (response.user.role === 'DRIVER') {
         navigate('/driver-home');
       } else {
@@ -49,7 +52,7 @@ const Login = () => {
       }
     } catch (error) {
       console.error('Login error:', error);
-      toast.error(error.response?.data?.message || '登录失败，请检查您的邮箱和密码');
+      toast.error(error.response?.data?.message || 'Login failed. Please check your email and password.');
     } finally {
       setLoading(false);
     }
@@ -64,10 +67,10 @@ const Login = () => {
             <ShoppingBag className="w-10 h-10 text-white" />
           </div>
           <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            欢迎回来
+            Welcome back
           </h2>
           <p className="text-gray-600">
-            登录到您的 DoorDash 账户
+            Sign in to your DoorDash account
           </p>
         </div>
 
@@ -76,7 +79,7 @@ const Login = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                邮箱地址
+                Email address
               </label>
               <input
                 id="email"
@@ -92,7 +95,7 @@ const Login = () => {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                密码
+                Password
               </label>
               <input
                 id="password"
@@ -111,25 +114,25 @@ const Login = () => {
               disabled={loading}
               className="w-full btn btn-primary"
             >
-              {loading ? '登录中...' : '登录'}
+              {loading ? 'Signing in...' : 'Sign in'}
             </button>
           </form>
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
-              还没有账户？{' '}
+              Don't have an account?{' '}
               <Link to="/register" className="font-medium text-primary-600 hover:text-primary-500">
-                立即注册
+                Sign up
               </Link>
             </p>
           </div>
 
           {/* Quick Login Hint */}
           <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-            <p className="text-xs text-gray-600 mb-2">💡 测试账户：</p>
+            <p className="text-xs text-gray-600 mb-2">💡 Test account:</p>
             <p className="text-xs text-gray-500">
-              邮箱: customer@example.com<br />
-              密码: password123
+              Email: customer@example.com<br />
+              Password: password123
             </p>
           </div>
         </div>

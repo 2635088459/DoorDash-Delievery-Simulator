@@ -54,7 +54,10 @@ public class AuthService {
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
         user.setPhoneNumber(request.getPhone());
-        user.setRole(request.getRole());
+        if (request.getRole() == User.UserRole.ADMIN) {
+            throw new BusinessException("Admin role cannot be self-registered");
+        }
+        user.setRole(request.getRole() == null ? User.UserRole.CUSTOMER : request.getRole());
         user.setIsActive(true);
         
         User savedUser = userRepository.save(user);

@@ -353,6 +353,19 @@ public class OrderService {
         
         return convertToDTO(order);
     }
+
+    /**
+     * 管理员获取订单详情
+     */
+    @Transactional(readOnly = true)
+    public OrderDTO getOrderByIdForAdmin(Long orderId) {
+        log.info("管理员获取订单详情: orderId={}", orderId);
+
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new ResourceNotFoundException("订单不存在，ID: " + orderId));
+
+        return convertToDTO(order);
+    }
     
     /**
      * 更新订单状态

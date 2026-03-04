@@ -4,13 +4,13 @@ import toast from 'react-hot-toast';
 import { restaurantService } from '../services/apiService';
 
 const weekDays = [
-  { key: 'mon', label: '周一' },
-  { key: 'tue', label: '周二' },
-  { key: 'wed', label: '周三' },
-  { key: 'thu', label: '周四' },
-  { key: 'fri', label: '周五' },
-  { key: 'sat', label: '周六' },
-  { key: 'sun', label: '周日' },
+  { key: 'mon', label: 'Mon' },
+  { key: 'tue', label: 'Tue' },
+  { key: 'wed', label: 'Wed' },
+  { key: 'thu', label: 'Thu' },
+  { key: 'fri', label: 'Fri' },
+  { key: 'sat', label: 'Sat' },
+  { key: 'sun', label: 'Sun' },
 ];
 
 const normalizeTime = (value) => {
@@ -83,7 +83,7 @@ const BusinessHours = () => {
         setError('');
       } catch (err) {
         console.error('Failed to load restaurant:', err);
-        setError(err.response?.data?.message || '加载餐厅信息失败');
+        setError(err.response?.data?.message || 'Failed to load restaurant details');
       } finally {
         setLoading(false);
       }
@@ -130,13 +130,13 @@ const BusinessHours = () => {
       };
       const updated = await restaurantService.update(restaurant.id, payload);
       setRestaurant(updated);
-      toast.success('营业时间已更新');
+      toast.success('Business hours updated');
       if (shouldReturnHome) {
         navigate('/restaurant-home', { replace: true });
       }
     } catch (err) {
       console.error('Failed to update business hours:', err);
-      toast.error(err.response?.data?.message || '更新失败');
+      toast.error(err.response?.data?.message || 'Update failed');
     } finally {
       setSaving(false);
     }
@@ -163,7 +163,7 @@ const BusinessHours = () => {
   const addRestDay = () => {
     if (!newRestDay) return;
     if (restDays.includes(newRestDay)) {
-      toast.error('该日期已在休息日中');
+      toast.error('That date is already marked as a rest day');
       return;
     }
     setRestDays((prev) => [...prev, newRestDay].sort());
@@ -183,7 +183,7 @@ const BusinessHours = () => {
             onClick={() => navigate('/restaurant-home')}
             className="mt-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
           >
-            返回餐厅首页
+            Back to restaurant home
           </button>
         </div>
       </div>
@@ -193,13 +193,13 @@ const BusinessHours = () => {
   return (
     <div className="max-w-5xl mx-auto p-6">
       <div className="bg-white rounded-lg shadow-md p-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">营业时间</h1>
-        <p className="text-gray-600 mb-6">设置餐厅的每日营业时间与营业状态。</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Business hours</h1>
+        <p className="text-gray-600 mb-6">Set daily hours and open status for your restaurant.</p>
 
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <div className="text-blue-900 font-semibold">当前餐厅</div>
+              <div className="text-blue-900 font-semibold">Current restaurant</div>
               <div className="text-blue-800 mt-1">
                 {restaurant?.name} · {restaurant?.city}
               </div>
@@ -207,21 +207,21 @@ const BusinessHours = () => {
             <span
               className={`px-3 py-1 rounded-full text-sm font-medium ${formState.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}
             >
-              {formState.isActive ? '营业中' : '暂停营业'}
+              {formState.isActive ? 'Open' : 'Paused'}
             </span>
           </div>
           <div className="text-sm text-blue-700 mt-3">
-            今日营业时间：{formState.openingTime || '--:--'} - {formState.closingTime || '--:--'}
+            Today's hours: {formState.openingTime || '--:--'} - {formState.closingTime || '--:--'}
           </div>
           <div className="text-sm text-blue-700 mt-1">
-            下次休息日：{getNextRestDay() || '暂无设置'}
+            Next rest day: {getNextRestDay() || 'Not set'}
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">开始营业时间</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Opening time</label>
               <input
                 type="time"
                 name="openingTime"
@@ -232,7 +232,7 @@ const BusinessHours = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">结束营业时间</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Closing time</label>
               <input
                 type="time"
                 name="closingTime"
@@ -252,11 +252,11 @@ const BusinessHours = () => {
               onChange={handleChange}
               className="rounded border-gray-300 text-red-600"
             />
-            当前营业中
+            Currently open
           </label>
 
           <div className="border border-gray-200 rounded-lg p-4">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">按周设置营业时间</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Weekly schedule</h2>
             <div className="space-y-4">
               {weekDays.map((day) => (
                 <div key={day.key} className="flex flex-col md:flex-row md:items-center gap-3">
@@ -268,7 +268,7 @@ const BusinessHours = () => {
                       onChange={(event) => updateDaySchedule(day.key, 'isClosed', event.target.checked)}
                       className="rounded border-gray-300 text-red-600"
                     />
-                    休息
+                    Closed
                   </label>
                   <div className="flex flex-1 items-center gap-2">
                     <input
@@ -290,11 +290,11 @@ const BusinessHours = () => {
                 </div>
               ))}
             </div>
-            <p className="text-xs text-gray-500 mt-3">按周配置已保存到数据库，并会同步到所有设备。</p>
+            <p className="text-xs text-gray-500 mt-3">Weekly schedule is saved and synced across devices.</p>
           </div>
 
           <div className="border border-gray-200 rounded-lg p-4">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">休息日配置</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Rest days</h2>
             <div className="flex flex-col md:flex-row gap-3">
               <input
                 type="date"
@@ -307,11 +307,11 @@ const BusinessHours = () => {
                 onClick={addRestDay}
                 className="bg-white text-gray-700 px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50"
               >
-                添加休息日
+                Add rest day
               </button>
             </div>
             {restDays.length === 0 ? (
-              <p className="text-sm text-gray-500 mt-3">暂无休息日配置</p>
+              <p className="text-sm text-gray-500 mt-3">No rest days configured</p>
             ) : (
               <div className="flex flex-wrap gap-2 mt-3">
                 {restDays.map((day) => (
@@ -328,7 +328,7 @@ const BusinessHours = () => {
                 ))}
               </div>
             )}
-            <p className="text-xs text-gray-500 mt-3">休息日配置已保存到数据库。</p>
+            <p className="text-xs text-gray-500 mt-3">Rest days are saved to the database.</p>
           </div>
 
           <div className="flex items-center gap-3">
@@ -337,14 +337,14 @@ const BusinessHours = () => {
               disabled={saving}
               className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 disabled:opacity-60"
             >
-              {saving ? '保存中...' : '保存设置'}
+              {saving ? 'Saving...' : 'Save settings'}
             </button>
             <button
               type="button"
               onClick={() => navigate('/restaurant-home')}
               className="bg-white text-gray-700 px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50"
             >
-              返回餐厅首页
+              Back to restaurant home
             </button>
           </div>
         </form>

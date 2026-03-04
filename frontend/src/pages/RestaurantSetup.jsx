@@ -33,11 +33,11 @@ const RestaurantSetup = () => {
       if (created?.id) {
         restaurantService.setActiveRestaurantId(created.id);
       }
-      toast.success('餐厅创建成功');
+      toast.success('Restaurant created successfully');
       navigate('/restaurant-home');
     } catch (err) {
       console.error('Failed to create restaurant:', err);
-      toast.error(err.response?.data?.message || '创建餐厅失败');
+      toast.error(err.response?.data?.message || 'Failed to create restaurant');
     } finally {
       setLoading(false);
     }
@@ -46,12 +46,12 @@ const RestaurantSetup = () => {
   return (
     <div className="max-w-4xl mx-auto p-6">
       <div className="bg-white rounded-lg shadow-md p-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">创建餐厅</h1>
-        <p className="text-gray-600 mb-6">请先创建餐厅信息，才能进入管理后台。</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Create restaurant</h1>
+        <p className="text-gray-600 mb-6">Create your restaurant profile before accessing the management console.</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">餐厅名称</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Restaurant name</label>
             <input
               type="text"
               name="name"
@@ -63,7 +63,7 @@ const RestaurantSetup = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">菜系类型</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Cuisine type</label>
             <input
               type="text"
               name="cuisineType"
@@ -75,7 +75,7 @@ const RestaurantSetup = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">联系电话</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Phone number</label>
             <input
               type="text"
               name="phoneNumber"
@@ -88,7 +88,7 @@ const RestaurantSetup = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">详细地址</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Street address</label>
             <input
               type="text"
               name="streetAddress"
@@ -101,7 +101,7 @@ const RestaurantSetup = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">城市</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
               <input
                 type="text"
                 name="city"
@@ -112,7 +112,7 @@ const RestaurantSetup = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">州/省</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">State/Province</label>
               <input
                 type="text"
                 name="state"
@@ -123,7 +123,7 @@ const RestaurantSetup = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">邮编</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">ZIP/Postal code</label>
               <input
                 type="text"
                 name="zipCode"
@@ -136,7 +136,7 @@ const RestaurantSetup = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">餐厅描述</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Restaurant description</label>
             <textarea
               name="description"
               value={formState.description}
@@ -152,14 +152,14 @@ const RestaurantSetup = () => {
               disabled={loading}
               className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 disabled:opacity-60"
             >
-              {loading ? '创建中...' : '创建餐厅'}
+              {loading ? 'Creating...' : 'Create restaurant'}
             </button>
             <button
               type="button"
               onClick={() => navigate('/restaurant-home')}
               className="bg-white text-gray-700 px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50"
             >
-              返回首页
+              Back to home
             </button>
           </div>
         </form>

@@ -107,6 +107,16 @@ public class OrderController {
         
         return ResponseEntity.ok(order);
     }
+
+    /**
+     * 管理员获取订单详情 (ADMIN)
+     */
+    @GetMapping("/admin/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<OrderDTO> getOrderByIdForAdmin(@PathVariable Long id) {
+        log.info("API - 管理员获取订单详情: orderId={}", id);
+        return ResponseEntity.ok(orderService.getOrderByIdForAdmin(id));
+    }
     
     /**
      * 更新订单状态 (RESTAURANT_OWNER 或 DRIVER)

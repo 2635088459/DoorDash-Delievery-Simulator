@@ -23,7 +23,7 @@ const formatDate = (value) => {
   if (!value) return '-';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return '-';
-  return date.toLocaleDateString('zh-CN', {
+  return date.toLocaleDateString('en-US', {
     month: '2-digit',
     day: '2-digit',
   });
@@ -48,7 +48,7 @@ const Reports = () => {
         setError('');
       } catch (err) {
         console.error('Failed to load reports:', err);
-        setError(err.response?.data?.message || '加载报表失败');
+        setError(err.response?.data?.message || 'Failed to load reports');
       } finally {
         setLoading(false);
       }
@@ -77,7 +77,7 @@ const Reports = () => {
     const itemMap = new Map();
     filteredOrders.forEach((order) => {
       order.items?.forEach((item) => {
-        const key = item.menuItemName || '未知菜品';
+        const key = item.menuItemName || 'Unknown item';
         const current = itemMap.get(key) || { quantity: 0, revenue: 0 };
         itemMap.set(key, {
           quantity: current.quantity + Number(item.quantity || 0),
@@ -125,7 +125,7 @@ const Reports = () => {
             onClick={() => navigate('/restaurant-home')}
             className="mt-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
           >
-            返回餐厅首页
+            Back to restaurant home
           </button>
         </div>
       </div>
@@ -137,7 +137,7 @@ const Reports = () => {
       <div className="bg-white rounded-lg shadow-md p-8 mb-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">营业报表</h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Sales reports</h1>
             <p className="text-gray-600">{restaurant?.name} · {restaurant?.city}</p>
           </div>
           <div className="flex items-center gap-2">
@@ -145,19 +145,19 @@ const Reports = () => {
               onClick={() => setRange('today')}
               className={`px-4 py-2 rounded-lg border ${range === 'today' ? 'bg-red-600 text-white border-red-600' : 'bg-white text-gray-700 border-gray-300'}`}
             >
-              今日
+              Today
             </button>
             <button
               onClick={() => setRange('7d')}
               className={`px-4 py-2 rounded-lg border ${range === '7d' ? 'bg-red-600 text-white border-red-600' : 'bg-white text-gray-700 border-gray-300'}`}
             >
-              近7天
+              Last 7 days
             </button>
             <button
               onClick={() => setRange('30d')}
               className={`px-4 py-2 rounded-lg border ${range === '30d' ? 'bg-red-600 text-white border-red-600' : 'bg-white text-gray-700 border-gray-300'}`}
             >
-              近30天
+              Last 30 days
             </button>
           </div>
         </div>
@@ -165,24 +165,24 @@ const Reports = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="text-sm text-gray-500">订单数量</div>
+          <div className="text-sm text-gray-500">Total orders</div>
           <div className="text-3xl font-bold text-gray-900 mt-2">{summary.totalOrders}</div>
         </div>
         <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="text-sm text-gray-500">总营业额</div>
+          <div className="text-sm text-gray-500">Total revenue</div>
           <div className="text-3xl font-bold text-gray-900 mt-2">¥{summary.totalRevenue.toFixed(2)}</div>
         </div>
         <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="text-sm text-gray-500">平均客单价</div>
+          <div className="text-sm text-gray-500">Average order value</div>
           <div className="text-3xl font-bold text-gray-900 mt-2">¥{summary.averageOrder.toFixed(2)}</div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">热门菜品</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Top items</h2>
           {summary.topItems.length === 0 ? (
-            <p className="text-gray-500">暂无数据</p>
+            <p className="text-gray-500">No data yet</p>
           ) : (
             <div className="space-y-3">
               {summary.topItems.map((item, index) => (
@@ -190,7 +190,7 @@ const Reports = () => {
                   <div className="text-gray-700">
                     {index + 1}. {item.name}
                   </div>
-                  <div className="text-sm text-gray-500">{item.quantity} 份 · ¥{item.revenue.toFixed(2)}</div>
+                  <div className="text-sm text-gray-500">{item.quantity} items · ¥{item.revenue.toFixed(2)}</div>
                 </div>
               ))}
             </div>
@@ -198,15 +198,15 @@ const Reports = () => {
         </div>
 
         <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">每日趋势</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Daily trend</h2>
           {summary.dailyStats.length === 0 ? (
-            <p className="text-gray-500">暂无数据</p>
+            <p className="text-gray-500">No data yet</p>
           ) : (
             <div className="space-y-3">
               {summary.dailyStats.map((day) => (
                 <div key={day.date} className="flex items-center justify-between">
                   <div className="text-gray-700">{day.date}</div>
-                  <div className="text-sm text-gray-500">{day.orders} 单 · ¥{day.revenue.toFixed(2)}</div>
+                  <div className="text-sm text-gray-500">{day.orders} orders · ¥{day.revenue.toFixed(2)}</div>
                 </div>
               ))}
             </div>
@@ -219,7 +219,7 @@ const Reports = () => {
           onClick={() => navigate('/restaurant-home')}
           className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
         >
-          返回餐厅首页
+          Back to restaurant home
         </button>
       </div>
     </div>

@@ -4,16 +4,16 @@ import toast from 'react-hot-toast';
 import { reviewService, restaurantService } from '../services/apiService';
 
 const ratingLabel = (rating) => {
-  if (rating >= 4) return '好评';
-  if (rating >= 3) return '中评';
-  return '差评';
+  if (rating >= 4) return 'Positive';
+  if (rating >= 3) return 'Neutral';
+  return 'Negative';
 };
 
 const formatDateTime = (value) => {
   if (!value) return '-';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return '-';
-  return date.toLocaleString('zh-CN', {
+  return date.toLocaleString('en-US', {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
@@ -70,7 +70,7 @@ const Reviews = () => {
         setError('');
       } catch (err) {
         console.error('Failed to load reviews:', err);
-        setError(err.response?.data?.message || '加载评价失败');
+        setError(err.response?.data?.message || 'Failed to load reviews');
       } finally {
         setLoading(false);
       }
@@ -113,7 +113,7 @@ const Reviews = () => {
   const handleReplySubmit = async (reviewId) => {
     const content = (replyDrafts[reviewId] || '').trim();
     if (!content) {
-      toast.error('回复内容不能为空');
+      toast.error('Reply cannot be empty');
       return;
     }
 
@@ -121,10 +121,10 @@ const Reviews = () => {
       setSavingReplyId(reviewId);
       const updated = await reviewService.replyToReview(reviewId, { replyContent: content });
       setReviews((prev) => prev.map((review) => (review.id === reviewId ? updated : review)));
-      toast.success('回复已保存');
+      toast.success('Reply saved');
     } catch (err) {
       console.error('Failed to reply review:', err);
-      toast.error(err.response?.data?.message || '回复失败');
+      toast.error(err.response?.data?.message || 'Failed to save reply');
     } finally {
       setSavingReplyId(null);
     }
@@ -147,7 +147,7 @@ const Reviews = () => {
             onClick={() => navigate('/restaurant-home')}
             className="mt-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
           >
-            返回餐厅首页
+            Back to restaurant home
           </button>
         </div>
       </div>
@@ -159,7 +159,7 @@ const Reviews = () => {
       <div className="bg-white rounded-lg shadow-md p-8 mb-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">顾客评价</h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Customer reviews</h1>
             <p className="text-gray-600">{restaurant?.name} · {restaurant?.city}</p>
           </div>
           <div className="flex items-center gap-2">
@@ -167,19 +167,19 @@ const Reviews = () => {
               onClick={() => setFilter('all')}
               className={`px-4 py-2 rounded-lg border ${filter === 'all' ? 'bg-red-600 text-white border-red-600' : 'bg-white text-gray-700 border-gray-300'}`}
             >
-              全部
+              All
             </button>
             <button
               onClick={() => setFilter('positive')}
               className={`px-4 py-2 rounded-lg border ${filter === 'positive' ? 'bg-red-600 text-white border-red-600' : 'bg-white text-gray-700 border-gray-300'}`}
             >
-              好评
+              Positive
             </button>
             <button
               onClick={() => setFilter('negative')}
               className={`px-4 py-2 rounded-lg border ${filter === 'negative' ? 'bg-red-600 text-white border-red-600' : 'bg-white text-gray-700 border-gray-300'}`}
             >
-              差评
+              Negative
             </button>
           </div>
         </div>
@@ -187,29 +187,29 @@ const Reviews = () => {
 
   <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-6">
         <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="text-sm text-gray-500">综合评分</div>
+          <div className="text-sm text-gray-500">Overall rating</div>
           <div className="text-3xl font-bold text-gray-900 mt-2">
             {ratingSummary?.averageRating ? Number(ratingSummary.averageRating).toFixed(1) : '--'}
           </div>
-          <div className="text-sm text-gray-500 mt-1">共 {ratingSummary?.totalReviews ?? 0} 条评价</div>
+          <div className="text-sm text-gray-500 mt-1">{ratingSummary?.totalReviews ?? 0} reviews</div>
         </div>
         <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="text-sm text-gray-500">食物评分</div>
+          <div className="text-sm text-gray-500">Food rating</div>
           <div className="text-3xl font-bold text-gray-900 mt-2">
             {ratingSummary?.averageFoodRating ? Number(ratingSummary.averageFoodRating).toFixed(1) : '--'}
           </div>
-          <div className="text-sm text-gray-500 mt-1">配送评分 {ratingSummary?.averageDeliveryRating ? Number(ratingSummary.averageDeliveryRating).toFixed(1) : '--'}</div>
+          <div className="text-sm text-gray-500 mt-1">Delivery rating {ratingSummary?.averageDeliveryRating ? Number(ratingSummary.averageDeliveryRating).toFixed(1) : '--'}</div>
         </div>
         <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="text-sm text-gray-500">评价结构</div>
-          <div className="text-sm text-gray-700 mt-3">好评 {ratingSummary?.positiveReviews ?? 0}</div>
-          <div className="text-sm text-gray-700">中评 {ratingSummary?.neutralReviews ?? 0}</div>
-          <div className="text-sm text-gray-700">差评 {ratingSummary?.negativeReviews ?? 0}</div>
+          <div className="text-sm text-gray-500">Review breakdown</div>
+          <div className="text-sm text-gray-700 mt-3">Positive {ratingSummary?.positiveReviews ?? 0}</div>
+          <div className="text-sm text-gray-700">Neutral {ratingSummary?.neutralReviews ?? 0}</div>
+          <div className="text-sm text-gray-700">Negative {ratingSummary?.negativeReviews ?? 0}</div>
         </div>
         <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="text-sm text-gray-500">顾客关键词</div>
+          <div className="text-sm text-gray-500">Customer keywords</div>
           {keywordStats.length === 0 ? (
-            <div className="text-sm text-gray-500 mt-3">暂无数据</div>
+            <div className="text-sm text-gray-500 mt-3">No data yet</div>
           ) : (
             <div className="flex flex-wrap gap-2 mt-3">
               {keywordStats.map((item) => (
@@ -227,15 +227,15 @@ const Reviews = () => {
 
       <div className="bg-white rounded-lg shadow-md">
         <div className="p-6 border-b border-gray-200">
-          <h2 className="text-xl font-bold text-gray-900">评价列表</h2>
-          <p className="text-gray-600 text-sm mt-1">共 {filteredReviews.length} 条</p>
+          <h2 className="text-xl font-bold text-gray-900">Reviews</h2>
+          <p className="text-gray-600 text-sm mt-1">{filteredReviews.length} total</p>
         </div>
 
         {filteredReviews.length === 0 ? (
           <div className="p-12 text-center">
             <div className="text-gray-400 text-6xl mb-4">💬</div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">暂无评价</h3>
-            <p className="text-gray-600">等待顾客完成订单并提交评价</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No reviews yet</h3>
+            <p className="text-gray-600">Wait for customers to complete orders and leave reviews</p>
           </div>
         ) : (
           <div className="divide-y divide-gray-200">
@@ -244,37 +244,37 @@ const Reviews = () => {
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                   <div>
                     <div className="flex flex-wrap items-center gap-3 mb-2">
-                      <h3 className="text-lg font-semibold text-gray-900">订单 #{review.orderNumber}</h3>
+                      <h3 className="text-lg font-semibold text-gray-900">Order #{review.orderNumber}</h3>
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${review.isPositive ? 'bg-green-100 text-green-700' : review.isNegative ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-600'}`}>
                         {ratingLabel(Number(review.overallRating || 0))}
                       </span>
                     </div>
-                    <div className="text-sm text-gray-600">顾客：{review.customerName || '匿名'}</div>
+                    <div className="text-sm text-gray-600">Customer: {review.customerName || 'Anonymous'}</div>
                     <div className="text-sm text-gray-500">{formatDateTime(review.createdAt)}</div>
                   </div>
                   <div className="text-sm text-gray-700">
-                    <div>综合评分：{Number(review.overallRating || 0).toFixed(1)}</div>
-                    <div>食物评分：{review.foodRating ?? '--'}</div>
-                    <div>配送评分：{review.deliveryRating ?? '--'}</div>
+                    <div>Overall rating: {Number(review.overallRating || 0).toFixed(1)}</div>
+                    <div>Food rating: {review.foodRating ?? '--'}</div>
+                    <div>Delivery rating: {review.deliveryRating ?? '--'}</div>
                   </div>
                 </div>
                 <div className="mt-4 bg-gray-50 rounded-lg p-4 text-gray-700">
-                  {review.comment || '顾客未填写评价内容。'}
+                  {review.comment || 'Customer did not leave a comment.'}
                 </div>
                 <div className="mt-4">
-                  <div className="text-sm font-medium text-gray-700 mb-2">餐厅回复</div>
+                  <div className="text-sm font-medium text-gray-700 mb-2">Restaurant reply</div>
                   {review.replyContent ? (
                     <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-sm text-green-800">
                       <div>{review.replyContent}</div>
                       <div className="text-xs text-green-600 mt-2">
-                        {review.replyBy || '餐厅'} · {formatDateTime(review.replyAt)}
+                        {review.replyBy || 'Restaurant'} · {formatDateTime(review.replyAt)}
                       </div>
                     </div>
                   ) : null}
                   <textarea
                     value={replyDrafts[review.id] || ''}
                     onChange={(event) => handleReplyChange(review.id, event.target.value)}
-                    placeholder="输入回复内容..."
+                    placeholder="Write a reply..."
                     rows="3"
                     className="mt-2 w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-500"
                   />
@@ -285,7 +285,7 @@ const Reviews = () => {
                       disabled={savingReplyId === review.id}
                       className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 disabled:opacity-60"
                     >
-                      {savingReplyId === review.id ? '保存中...' : '保存回复'}
+                      {savingReplyId === review.id ? 'Saving...' : 'Save reply'}
                     </button>
                   </div>
                 </div>
@@ -300,7 +300,7 @@ const Reviews = () => {
           onClick={() => navigate('/restaurant-home')}
           className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
         >
-          返回餐厅首页
+          Back to restaurant home
         </button>
       </div>
     </div>

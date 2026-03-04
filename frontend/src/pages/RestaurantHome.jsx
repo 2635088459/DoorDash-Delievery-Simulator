@@ -112,7 +112,7 @@ const RestaurantHome = () => {
         setRestaurants(ownerRestaurants);
         if (!ownerRestaurants.length) {
           setHasRestaurant(false);
-          setSetupMessage('您还没有创建餐厅，请先完成餐厅信息设置。');
+          setSetupMessage("You haven't created a restaurant yet. Please complete the setup first.");
           return;
         }
 
@@ -131,7 +131,7 @@ const RestaurantHome = () => {
         console.error('Failed to load restaurant stats:', error);
         if (error.response?.status === 404) {
           setHasRestaurant(false);
-          setSetupMessage('您还没有创建餐厅，请先完成餐厅信息设置。');
+          setSetupMessage("You haven't created a restaurant yet. Please complete the setup first.");
         }
       }
     };
@@ -142,48 +142,48 @@ const RestaurantHome = () => {
   const quickActions = [
     {
       icon: ShoppingBag,
-      title: '订单管理',
-      description: '查看和处理餐厅订单',
+      title: 'Order management',
+      description: 'View and handle restaurant orders',
       color: 'bg-blue-500',
       hoverColor: 'hover:bg-blue-600',
       link: '/restaurant-management'
     },
     {
       icon: Store,
-      title: '菜品管理',
-      description: '添加、编辑和删除菜品',
+      title: 'Menu management',
+      description: 'Add, edit, and remove menu items',
       color: 'bg-green-500',
       hoverColor: 'hover:bg-green-600',
       link: '/menu-management'
     },
     {
       icon: Clock,
-      title: '营业时间',
-      description: '设置餐厅营业时间',
+      title: 'Business hours',
+      description: 'Set restaurant opening hours',
       color: 'bg-purple-500',
       hoverColor: 'hover:bg-purple-600',
       link: '/business-hours?returnHome=true'
     },
     {
       icon: Gift,
-      title: '优惠券',
-      description: '创建和管理优惠券',
+      title: 'Coupons',
+      description: 'Create and manage coupons',
       color: 'bg-pink-500',
       hoverColor: 'hover:bg-pink-600',
       link: '/coupons'
     },
     {
       icon: TrendingUp,
-      title: '营业报表',
-      description: '查看销售数据和统计',
+      title: 'Sales reports',
+      description: 'View sales data and insights',
       color: 'bg-orange-500',
       hoverColor: 'hover:bg-orange-600',
       link: '/reports'
     },
     {
       icon: Users,
-      title: '顾客评价',
-      description: '查看和回复顾客评价',
+      title: 'Customer reviews',
+      description: 'View and reply to customer reviews',
       color: 'bg-indigo-500',
       hoverColor: 'hover:bg-indigo-600',
       link: '/reviews'
@@ -198,10 +198,10 @@ const RestaurantHome = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-4xl font-bold mb-2">
-                欢迎回来，{user?.firstName || 'Restaurant'} 👋
+                Welcome back, {user?.firstName || 'Restaurant'} 👋
               </h1>
               <p className="text-red-100 text-lg">
-                管理您的餐厅，提供优质服务
+                Manage your restaurant and deliver great service
               </p>
             </div>
             <Store className="w-24 h-24 opacity-20" />
@@ -209,7 +209,7 @@ const RestaurantHome = () => {
           {restaurants.length > 0 && (
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                <span className="text-sm text-red-100">当前餐厅</span>
+                <span className="text-sm text-red-100">Active restaurant</span>
                 {restaurants.length > 1 ? (
                   <select
                     value={selectedRestaurantId || ''}
@@ -232,7 +232,7 @@ const RestaurantHome = () => {
                 onClick={() => navigate('/restaurant-setup')}
                 className="bg-white/90 text-red-600 px-3 py-2 rounded-lg text-sm font-semibold hover:bg-white"
               >
-                新增餐厅
+                Add restaurant
               </button>
             </div>
           )}
@@ -243,14 +243,14 @@ const RestaurantHome = () => {
           <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6 mb-8">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
-                <div className="text-lg font-semibold text-yellow-900">尚未创建餐厅</div>
+                <div className="text-lg font-semibold text-yellow-900">No restaurant yet</div>
                 <div className="text-yellow-800 mt-1">{setupMessage}</div>
               </div>
               <button
                 onClick={() => navigate('/restaurant-setup')}
                 className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
               >
-                立即创建餐厅
+                Create restaurant
               </button>
             </div>
           </div>
@@ -259,7 +259,7 @@ const RestaurantHome = () => {
           <div className="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-500 text-sm font-medium">今日订单</p>
+                <p className="text-gray-500 text-sm font-medium">Orders today</p>
                 <p className="text-3xl font-bold text-gray-900 mt-1">{stats.todayOrders}</p>
               </div>
               <ShoppingBag className="w-12 h-12 text-blue-500 opacity-20" />
@@ -269,7 +269,7 @@ const RestaurantHome = () => {
           <div className="bg-white rounded-xl shadow-md p-6 border-l-4 border-green-500">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-500 text-sm font-medium">今日营业额</p>
+                <p className="text-gray-500 text-sm font-medium">Revenue today</p>
                 <p className="text-3xl font-bold text-gray-900 mt-1">¥{stats.todayRevenue.toFixed(2)}</p>
               </div>
               <TrendingUp className="w-12 h-12 text-green-500 opacity-20" />
@@ -279,7 +279,7 @@ const RestaurantHome = () => {
           <div className="bg-white rounded-xl shadow-md p-6 border-l-4 border-purple-500">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-500 text-sm font-medium">菜品总数</p>
+                <p className="text-gray-500 text-sm font-medium">Menu items</p>
                 <p className="text-3xl font-bold text-gray-900 mt-1">{stats.menuCount}</p>
               </div>
               <Store className="w-12 h-12 text-purple-500 opacity-20" />
@@ -289,7 +289,7 @@ const RestaurantHome = () => {
           <div className="bg-white rounded-xl shadow-md p-6 border-l-4 border-orange-500">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-500 text-sm font-medium">顾客评分</p>
+                <p className="text-gray-500 text-sm font-medium">Customer rating</p>
                 <p className="text-3xl font-bold text-gray-900 mt-1">
                   {stats.rating === null ? '--' : Number(stats.rating).toFixed(1)}
                 </p>
@@ -301,7 +301,7 @@ const RestaurantHome = () => {
           <div className="bg-white rounded-xl shadow-md p-6 border-l-4 border-emerald-500">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-500 text-sm font-medium">本周营业天数</p>
+                <p className="text-gray-500 text-sm font-medium">Open days this week</p>
                 <p className="text-3xl font-bold text-gray-900 mt-1">
                   {stats.weeklyOpenDays === null ? '--' : stats.weeklyOpenDays}
                 </p>
@@ -313,7 +313,7 @@ const RestaurantHome = () => {
 
         {/* Quick Actions */}
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">快捷功能</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Quick actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {quickActions.map((action, index) => {
               const Icon = action.icon;
@@ -344,23 +344,23 @@ const RestaurantHome = () => {
 
         {/* Tips Section */}
         <div className="mt-8 bg-blue-50 border border-blue-200 rounded-xl p-6">
-          <h3 className="text-lg font-semibold text-blue-900 mb-3">💡 经营小贴士</h3>
+          <h3 className="text-lg font-semibold text-blue-900 mb-3">💡 Operations tips</h3>
           <ul className="space-y-2 text-blue-800">
             <li className="flex items-start">
               <span className="mr-2">•</span>
-              <span>及时处理订单，提高顾客满意度</span>
+              <span>Handle orders promptly to improve customer satisfaction</span>
             </li>
             <li className="flex items-start">
               <span className="mr-2">•</span>
-              <span>定期更新菜单，推出新品吸引顾客</span>
+              <span>Refresh your menu regularly and launch new items</span>
             </li>
             <li className="flex items-start">
               <span className="mr-2">•</span>
-              <span>设置优惠券活动，促进销售增长</span>
+              <span>Run coupon campaigns to boost sales</span>
             </li>
             <li className="flex items-start">
               <span className="mr-2">•</span>
-              <span>关注顾客评价，持续改进服务</span>
+              <span>Monitor reviews and keep improving service</span>
             </li>
           </ul>
         </div>

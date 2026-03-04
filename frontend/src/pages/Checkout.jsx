@@ -37,7 +37,7 @@ const Checkout = () => {
   const handlePlaceOrder = async () => {
     // 验证地址
     if (!deliveryAddress.street || !deliveryAddress.city || !deliveryAddress.state || !deliveryAddress.zipCode) {
-      toast.error('请填写完整的配送地址');
+  toast.error('Please complete the delivery address');
       return;
     }
 
@@ -71,7 +71,7 @@ const Checkout = () => {
       clearCart();
 
       // 显示成功消息
-      toast.success('订单创建成功！');
+  toast.success('Order created successfully!');
 
       // 跳转到订单详情页
       navigate(`/orders/${order.id}`);
@@ -86,9 +86,9 @@ const Checkout = () => {
           .map(([field, message]) => `${field}: ${message}`)
           .join('\n');
         console.error('Validation errors:', validationErrors);
-        toast.error(`验证失败:\n${errorMessages}`);
+  toast.error(`Validation failed:\n${errorMessages}`);
       } else {
-        const errorMsg = error.response?.data?.message || error.response?.data?.error || '订单创建失败，请重试';
+  const errorMsg = error.response?.data?.message || error.response?.data?.error || 'Failed to create order. Please try again.';
         toast.error(errorMsg);
       }
     } finally {
@@ -106,9 +106,9 @@ const Checkout = () => {
             className="flex items-center text-gray-600 hover:text-gray-900 mr-6"
           >
             <ArrowLeft className="w-5 h-5 mr-2" />
-            返回购物车
+            Back to cart
           </button>
-          <h1 className="text-3xl font-bold text-gray-900">确认订单</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Review order</h1>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -118,7 +118,7 @@ const Checkout = () => {
             <div className="bg-white rounded-xl shadow-sm p-6">
               <div className="flex items-center mb-4">
                 <Store className="w-6 h-6 text-primary-600 mr-3" />
-                <h2 className="text-xl font-bold text-gray-900">订单餐厅</h2>
+                <h2 className="text-xl font-bold text-gray-900">Restaurant</h2>
               </div>
               <p className="text-gray-700">{restaurantName}</p>
             </div>
@@ -127,19 +127,19 @@ const Checkout = () => {
             <div className="bg-white rounded-xl shadow-sm p-6">
               <div className="flex items-center mb-4">
                 <MapPin className="w-6 h-6 text-primary-600 mr-3" />
-                <h2 className="text-xl font-bold text-gray-900">配送地址</h2>
+                <h2 className="text-xl font-bold text-gray-900">Delivery address</h2>
               </div>
 
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    街道地址 *
+                    Street address *
                   </label>
                   <input
                     type="text"
                     value={deliveryAddress.street}
                     onChange={(e) => setDeliveryAddress({ ...deliveryAddress, street: e.target.value })}
-                    placeholder="例如：123 Main Street, Apt 4B"
+                    placeholder="e.g., 123 Main Street, Apt 4B"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   />
                 </div>
@@ -147,26 +147,26 @@ const Checkout = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      城市 *
+                      City *
                     </label>
                     <input
                       type="text"
                       value={deliveryAddress.city}
                       onChange={(e) => setDeliveryAddress({ ...deliveryAddress, city: e.target.value })}
-                      placeholder="例如：San Francisco"
+                      placeholder="e.g., San Francisco"
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      州/省 *
+                      State/Province *
                     </label>
                     <input
                       type="text"
                       value={deliveryAddress.state}
                       onChange={(e) => setDeliveryAddress({ ...deliveryAddress, state: e.target.value })}
-                      placeholder="例如：CA"
+                      placeholder="e.g., CA"
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     />
                   </div>
@@ -174,25 +174,25 @@ const Checkout = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    邮政编码 *
+                    ZIP/Postal code *
                   </label>
                   <input
                     type="text"
                     value={deliveryAddress.zipCode}
                     onChange={(e) => setDeliveryAddress({ ...deliveryAddress, zipCode: e.target.value })}
-                    placeholder="例如：94103"
+                    placeholder="e.g., 94103"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    配送说明（可选）
+                    Delivery instructions (optional)
                   </label>
                   <textarea
                     value={deliveryAddress.instructions}
                     onChange={(e) => setDeliveryAddress({ ...deliveryAddress, instructions: e.target.value })}
-                    placeholder="例如：请在门口按门铃"
+                    placeholder="e.g., Please ring the doorbell"
                     rows="3"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   />
@@ -204,7 +204,7 @@ const Checkout = () => {
             <div className="bg-white rounded-xl shadow-sm p-6">
               <div className="flex items-center mb-4">
                 <CreditCard className="w-6 h-6 text-primary-600 mr-3" />
-                <h2 className="text-xl font-bold text-gray-900">支付方式</h2>
+                <h2 className="text-xl font-bold text-gray-900">Payment method</h2>
               </div>
 
               <div className="space-y-3">
@@ -218,8 +218,8 @@ const Checkout = () => {
                 >
                   <CreditCard className="w-6 h-6 text-gray-600 mr-3" />
                   <div className="flex-1">
-                    <p className="font-medium text-gray-900">信用卡/借记卡</p>
-                    <p className="text-sm text-gray-500">在线支付</p>
+                    <p className="font-medium text-gray-900">Credit/Debit card</p>
+                    <p className="text-sm text-gray-500">Online payment</p>
                   </div>
                   {paymentMethod === 'CREDIT_CARD' && (
                     <div className="w-5 h-5 bg-primary-500 rounded-full flex items-center justify-center">
@@ -238,8 +238,8 @@ const Checkout = () => {
                 >
                   <Wallet className="w-6 h-6 text-gray-600 mr-3" />
                   <div className="flex-1">
-                    <p className="font-medium text-gray-900">货到付款</p>
-                    <p className="text-sm text-gray-500">现金支付</p>
+                    <p className="font-medium text-gray-900">Cash on delivery</p>
+                    <p className="text-sm text-gray-500">Cash payment</p>
                   </div>
                   {paymentMethod === 'CASH' && (
                     <div className="w-5 h-5 bg-primary-500 rounded-full flex items-center justify-center">
@@ -254,11 +254,11 @@ const Checkout = () => {
             <div className="bg-white rounded-xl shadow-sm p-6">
               <div className="flex items-center mb-4">
                 <Wallet className="w-6 h-6 text-primary-600 mr-3" />
-                <h2 className="text-xl font-bold text-gray-900">给骑手小费</h2>
+                <h2 className="text-xl font-bold text-gray-900">Tip your driver</h2>
               </div>
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">
-                  小费金额（可选）
+                  Tip amount (optional)
                 </label>
                 <div className="flex items-center space-x-3">
                   <span className="text-gray-600">¥</span>
@@ -272,7 +272,7 @@ const Checkout = () => {
                     placeholder="0.00"
                   />
                 </div>
-                <p className="text-xs text-gray-500">小费将直接计入骑手收益</p>
+                <p className="text-xs text-gray-500">Tips go directly to the driver</p>
               </div>
             </div>
           </div>
@@ -280,7 +280,7 @@ const Checkout = () => {
           {/* Right Column - Order Summary */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-xl shadow-sm p-6 sticky top-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">订单摘要</h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-6">Order summary</h2>
 
               {/* Order Items */}
               <div className="space-y-3 mb-6 max-h-60 overflow-y-auto">
@@ -299,24 +299,24 @@ const Checkout = () => {
 
               <div className="border-t border-gray-200 pt-4 space-y-3">
                 <div className="flex justify-between text-gray-700">
-                  <span>小计</span>
+                  <span>Subtotal</span>
                   <span>¥{subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-gray-700">
-                  <span>配送费</span>
-                  <span className="text-green-600">免费</span>
+                  <span>Delivery fee</span>
+                  <span className="text-green-600">Free</span>
                 </div>
                 <div className="flex justify-between text-gray-700">
-                  <span>服务费</span>
+                  <span>Service fee</span>
                   <span>¥0.00</span>
                 </div>
                 <div className="flex justify-between text-gray-700">
-                  <span>小费</span>
+                  <span>Tip</span>
                   <span>¥{parsedTip.toFixed(2)}</span>
                 </div>
                 <div className="border-t border-gray-200 pt-3">
                   <div className="flex justify-between items-center">
-                    <span className="text-lg font-bold text-gray-900">总计</span>
+                    <span className="text-lg font-bold text-gray-900">Total</span>
                     <span className="text-2xl font-bold text-primary-600">
                       ¥{totalWithTip.toFixed(2)}
                     </span>
@@ -332,15 +332,15 @@ const Checkout = () => {
                 {loading ? (
                   <div className="flex items-center justify-center">
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                    处理中...
+                    Processing...
                   </div>
                 ) : (
-                  '提交订单'
+                  'Place order'
                 )}
               </button>
 
               <p className="text-xs text-gray-500 text-center mt-4">
-                点击"提交订单"即表示您同意我们的服务条款和隐私政策
+                By clicking "Place order" you agree to our terms and privacy policy.
               </p>
             </div>
           </div>

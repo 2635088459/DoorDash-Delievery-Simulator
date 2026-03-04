@@ -78,6 +78,7 @@ public class User {
     public enum UserRole {
         CUSTOMER,
         RESTAURANT_OWNER,
-        DRIVER
+        DRIVER,
+        ADMIN
     }
 }

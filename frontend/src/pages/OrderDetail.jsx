@@ -34,7 +34,7 @@ const OrderDetail = () => {
       setOrder(data);
     } catch (error) {
       console.error('Failed to load order:', error);
-      toast.error('加载订单详情失败');
+      toast.error('Failed to load order details');
     } finally {
       setLoading(false);
     }
@@ -42,13 +42,13 @@ const OrderDetail = () => {
 
   const getStatusBadge = (status) => {
     const badges = {
-      PENDING: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: '待确认' },
-      CONFIRMED: { bg: 'bg-blue-100', text: 'text-blue-800', label: '已确认' },
-      PREPARING: { bg: 'bg-purple-100', text: 'text-purple-800', label: '制作中' },
-      READY: { bg: 'bg-green-100', text: 'text-green-800', label: '待取餐' },
-      PICKED_UP: { bg: 'bg-indigo-100', text: 'text-indigo-800', label: '配送中' },
-      DELIVERED: { bg: 'bg-green-100', text: 'text-green-800', label: '已送达' },
-      CANCELLED: { bg: 'bg-red-100', text: 'text-red-800', label: '已取消' },
+      PENDING: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Pending confirmation' },
+      CONFIRMED: { bg: 'bg-blue-100', text: 'text-blue-800', label: 'Confirmed' },
+      PREPARING: { bg: 'bg-purple-100', text: 'text-purple-800', label: 'Preparing' },
+      READY: { bg: 'bg-green-100', text: 'text-green-800', label: 'Ready for pickup' },
+      PICKED_UP: { bg: 'bg-indigo-100', text: 'text-indigo-800', label: 'Out for delivery' },
+      DELIVERED: { bg: 'bg-green-100', text: 'text-green-800', label: 'Delivered' },
+      CANCELLED: { bg: 'bg-red-100', text: 'text-red-800', label: 'Cancelled' },
     };
     const badge = badges[status] || { bg: 'bg-gray-100', text: 'text-gray-800', label: status };
     return (
@@ -60,10 +60,10 @@ const OrderDetail = () => {
 
   const getPaymentStatusBadge = (status) => {
     const badges = {
-      PENDING: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: '待支付' },
-      PAID: { bg: 'bg-green-100', text: 'text-green-800', label: '已支付' },
-      FAILED: { bg: 'bg-red-100', text: 'text-red-800', label: '支付失败' },
-      REFUNDED: { bg: 'bg-gray-100', text: 'text-gray-800', label: '已退款' },
+      PENDING: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Payment pending' },
+      PAID: { bg: 'bg-green-100', text: 'text-green-800', label: 'Paid' },
+      FAILED: { bg: 'bg-red-100', text: 'text-red-800', label: 'Payment failed' },
+      REFUNDED: { bg: 'bg-gray-100', text: 'text-gray-800', label: 'Refunded' },
     };
     const badge = badges[status] || { bg: 'bg-gray-100', text: 'text-gray-800', label: status };
     return (
@@ -75,10 +75,10 @@ const OrderDetail = () => {
 
   const getPaymentMethodLabel = (method) => {
     const labels = {
-      CREDIT_CARD: '信用卡',
-      DEBIT_CARD: '借记卡',
-      CASH: '现金',
-      DIGITAL_WALLET: '数字钱包',
+      CREDIT_CARD: 'Credit card',
+      DEBIT_CARD: 'Debit card',
+      CASH: 'Cash',
+      DIGITAL_WALLET: 'Digital wallet',
     };
     return labels[method] || method;
   };
@@ -90,7 +90,7 @@ const OrderDetail = () => {
   const formatDateTime = (dateString) => {
     if (!dateString) return '-';
     const date = new Date(dateString);
-    return date.toLocaleString('zh-CN', {
+    return date.toLocaleString('en-US', {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
@@ -103,7 +103,7 @@ const OrderDetail = () => {
     if (!order) return [];
     
     const timeline = [
-      { status: 'PENDING', label: '订单已创建', time: order.createdAt, completed: true },
+      { status: 'PENDING', label: 'Order created', time: order.createdAt, completed: true },
     ];
 
     const statusOrder = ['CONFIRMED', 'PREPARING', 'READY', 'PICKED_UP', 'DELIVERED'];
@@ -111,11 +111,11 @@ const OrderDetail = () => {
 
     statusOrder.forEach((status, index) => {
       const labels = {
-        CONFIRMED: '餐厅已确认',
-        PREPARING: '正在制作',
-        READY: '待取餐',
-        PICKED_UP: '骑手已取餐',
-        DELIVERED: '已送达',
+        CONFIRMED: 'Restaurant confirmed',
+        PREPARING: 'Preparing',
+        READY: 'Ready for pickup',
+        PICKED_UP: 'Driver picked up',
+        DELIVERED: 'Delivered',
       };
 
       timeline.push({
@@ -129,7 +129,7 @@ const OrderDetail = () => {
     if (order.status === 'CANCELLED') {
       timeline.push({
         status: 'CANCELLED',
-        label: '订单已取消',
+        label: 'Order cancelled',
         time: null,
         completed: true,
       });
@@ -143,7 +143,7 @@ const OrderDetail = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">加载订单详情中...</p>
+          <p className="text-gray-600">Loading order details...</p>
         </div>
       </div>
     );
@@ -154,13 +154,13 @@ const OrderDetail = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-700 mb-2">订单不存在</h2>
-          <p className="text-gray-500 mb-4">找不到该订单信息</p>
+          <h2 className="text-2xl font-bold text-gray-700 mb-2">Order not found</h2>
+          <p className="text-gray-500 mb-4">We couldn't find that order.</p>
           <button
             onClick={() => navigate('/orders')}
             className="text-primary-600 hover:text-primary-700 font-medium"
           >
-            返回订单列表
+            Back to orders
           </button>
         </div>
       </div>
@@ -180,12 +180,12 @@ const OrderDetail = () => {
             className="flex items-center text-gray-600 hover:text-gray-900 mb-4"
           >
             <ArrowLeft className="w-5 h-5 mr-2" />
-            返回订单列表
+            Back to orders
           </button>
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">订单详情</h1>
-              <p className="text-gray-500 mt-1">订单号: {order.orderNumber}</p>
+              <h1 className="text-3xl font-bold text-gray-900">Order details</h1>
+              <p className="text-gray-500 mt-1">Order #{order.orderNumber}</p>
             </div>
             {getStatusBadge(order.status)}
           </div>
@@ -195,7 +195,7 @@ const OrderDetail = () => {
         <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
           <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center">
             <Clock className="w-5 h-5 mr-2 text-primary-600" />
-            订单进度
+            Order timeline
           </h2>
           <div className="space-y-4">
             {timeline.map((step, index) => (
@@ -248,7 +248,7 @@ const OrderDetail = () => {
             <div className="bg-white rounded-xl shadow-sm p-6">
               <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
                 <Store className="w-5 h-5 mr-2 text-primary-600" />
-                餐厅信息
+                Restaurant
               </h2>
               <div>
                 <p className="font-medium text-gray-900">{order.restaurantName}</p>
@@ -262,7 +262,7 @@ const OrderDetail = () => {
             <div className="bg-white rounded-xl shadow-sm p-6">
               <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
                 <Package className="w-5 h-5 mr-2 text-primary-600" />
-                订单商品
+                Items
               </h2>
               <div className="space-y-4">
                 {order.items?.map((item, index) => (
@@ -285,7 +285,7 @@ const OrderDetail = () => {
 
               {order.specialInstructions && (
                 <div className="mt-4 pt-4 border-t border-gray-200">
-                  <p className="text-sm text-gray-500">备注</p>
+                  <p className="text-sm text-gray-500">Notes</p>
                   <p className="text-gray-900 mt-1">{order.specialInstructions}</p>
                 </div>
               )}
@@ -295,7 +295,7 @@ const OrderDetail = () => {
             <div className="bg-white rounded-xl shadow-sm p-6">
               <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
                 <MapPin className="w-5 h-5 mr-2 text-primary-600" />
-                配送地址
+                Delivery address
               </h2>
               <div>
                 <p className="text-gray-900">{order.deliveryAddress}</p>
@@ -307,18 +307,18 @@ const OrderDetail = () => {
               <div className="bg-white rounded-xl shadow-sm p-6">
                 <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
                   <Truck className="w-5 h-5 mr-2 text-primary-600" />
-                  配送信息
+                  Delivery
                 </h2>
                 <div className="space-y-3">
                   <div className="flex items-center">
                     <User className="w-4 h-4 text-gray-400 mr-2" />
-                    <span className="text-gray-600">骑手：</span>
-                    <span className="ml-2 text-gray-900">{order.delivery.driverName || '待分配'}</span>
+                    <span className="text-gray-600">Driver:</span>
+                    <span className="ml-2 text-gray-900">{order.delivery.driverName || 'Unassigned'}</span>
                   </div>
                   {order.delivery.driverPhone && (
                     <div className="flex items-center">
                       <Phone className="w-4 h-4 text-gray-400 mr-2" />
-                      <span className="text-gray-600">电话：</span>
+                      <span className="text-gray-600">Phone:</span>
                       <a
                         href={`tel:${order.delivery.driverPhone}`}
                         className="ml-2 text-primary-600 hover:text-primary-700"
@@ -336,28 +336,28 @@ const OrderDetail = () => {
           <div className="space-y-6">
             {/* Order Summary */}
             <div className="bg-white rounded-xl shadow-sm p-6 sticky top-6">
-              <h2 className="text-lg font-bold text-gray-900 mb-4">订单摘要</h2>
+              <h2 className="text-lg font-bold text-gray-900 mb-4">Order summary</h2>
               
               <div className="space-y-3 mb-4">
                 <div className="flex justify-between text-gray-600">
-                  <span>小计</span>
+                  <span>Subtotal</span>
                   <span>¥{order.subtotal}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
-                  <span>配送费</span>
+                  <span>Delivery fee</span>
                   <span className={order.deliveryFee === 0 ? 'text-green-600' : ''}>
-                    {order.deliveryFee === 0 ? '免费' : `¥${order.deliveryFee}`}
+                    {order.deliveryFee === 0 ? 'Free' : `¥${order.deliveryFee}`}
                   </span>
                 </div>
                 <div className="flex justify-between text-gray-600">
-                  <span>服务费</span>
+                  <span>Service fee</span>
                   <span>¥{order.serviceFee || 0}</span>
                 </div>
               </div>
 
               <div className="pt-4 border-t border-gray-200">
                 <div className="flex justify-between items-center mb-4">
-                  <span className="text-lg font-bold text-gray-900">总计</span>
+                  <span className="text-lg font-bold text-gray-900">Total</span>
                   <span className="text-2xl font-bold text-primary-600">
                     ¥{order.totalAmount}
                   </span>
@@ -375,12 +375,12 @@ const OrderDetail = () => {
               <div className="mt-6 pt-6 border-t border-gray-200 space-y-2 text-sm text-gray-500">
                 <div className="flex items-center">
                   <Calendar className="w-4 h-4 mr-2" />
-                  <span>下单时间：{formatDateTime(order.createdAt)}</span>
+                  <span>Placed at: {formatDateTime(order.createdAt)}</span>
                 </div>
                 {order.estimatedDeliveryTime && (
                   <div className="flex items-center">
                     <Clock className="w-4 h-4 mr-2" />
-                    <span>预计送达：{formatDateTime(order.estimatedDeliveryTime)}</span>
+                    <span>Estimated delivery: {formatDateTime(order.estimatedDeliveryTime)}</span>
                   </div>
                 )}
               </div>

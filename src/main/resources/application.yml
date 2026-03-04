@@ -36,6 +36,8 @@ server:
 # 文件上传存储目录
 app:
   upload-dir: uploads
+  ticket:
+    auto-close-hours: 24
 
 # AWS Cognito 配置
 aws:

@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Bell, ShoppingBag, ShoppingCart, User, LogOut, Menu, X } from 'lucide-react';
+import { Bell, ShoppingBag, ShoppingCart, User, LogOut, Menu, X, ShieldCheck, Trash2 } from 'lucide-react';
 import useAuthStore from '../store/authStore';
 import useNotificationStore from '../store/notificationStore';
 import useCartStore from '../store/cartStore';
 import websocketService from '../services/websocket';
-import { notificationService } from '../services/apiService';
+import { authService, notificationService } from '../services/apiService';
 import toast from 'react-hot-toast';
 
 const Navbar = () => {
@@ -14,6 +14,7 @@ const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuthStore();
   const { unreadCount, setNotifications, addNotification, setConnected, isConnected } = useNotificationStore();
   const { getTotalItems } = useCartStore();
+  const [tokenRemaining, setTokenRemaining] = useState('');
 
   useEffect(() => {
     if (isAuthenticated && user?.email) {
@@ -22,7 +23,7 @@ const Navbar = () => {
         user.email,
         (notification) => {
           addNotification(notification);
-          toast.success(`新通知: ${notification.title}`, {
+          toast.success(`New notification: ${notification.title}`, {
             icon: '🔔',
           });
         },
@@ -45,6 +46,40 @@ const Navbar = () => {
     }
   }, [isAuthenticated, user?.email]);
 
+  useEffect(() => {
+    if (!isAuthenticated) return undefined;
+
+    const updateTokenRemaining = () => {
+      const rawToken = localStorage.getItem('token') || localStorage.getItem('accessToken');
+      if (!rawToken || rawToken === 'undefined' || rawToken === 'null') {
+        setTokenRemaining('Not signed in');
+        return;
+      }
+
+      try {
+        const payload = JSON.parse(atob(rawToken.split('.')[1] || ''));
+        if (!payload?.exp) {
+          setTokenRemaining('Unknown');
+          return;
+        }
+        const diffMs = payload.exp * 1000 - Date.now();
+        if (diffMs <= 0) {
+          setTokenRemaining('Expired');
+          return;
+        }
+        const minutes = Math.floor(diffMs / 60000);
+        const seconds = Math.floor((diffMs % 60000) / 1000);
+        setTokenRemaining(`${minutes}m ${seconds}s`);
+      } catch (error) {
+        setTokenRemaining('Parse error');
+      }
+    };
+
+    updateTokenRemaining();
+    const timer = setInterval(updateTokenRemaining, 1000);
+    return () => clearInterval(timer);
+  }, [isAuthenticated]);
+
   const loadNotifications = async () => {
     try {
       const notifications = await notificationService.getAll();
@@ -61,7 +96,27 @@ const Navbar = () => {
     websocketService.disconnect();
     logout();
     navigate('/login');
-    toast.success('已退出登录');
+    toast.success('Signed out');
+  };
+
+  const handleSessionCheck = async () => {
+    try {
+      const response = await authService.testSession();
+      toast.success(`Session valid: ${response}`);
+    } catch (error) {
+      console.error('Session check failed:', error);
+      toast.error(error.response?.data || 'Session invalid. Please sign in again.');
+    }
+  };
+
+  const handleClearToken = () => {
+    websocketService.disconnect();
+    localStorage.removeItem('token');
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
+    toast.success('Token cleared. Please sign in again.');
+    navigate('/login');
   };
 
   if (!isAuthenticated) {
@@ -85,13 +140,13 @@ const Navbar = () => {
             {user?.role === 'CUSTOMER' && (
               <>
                 <Link to="/" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
-                  首页
+                  Home
                 </Link>
                 <Link to="/restaurants" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
-                  餐厅
+                  Restaurants
                 </Link>
                 <Link to="/orders" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
-                  我的订单
+                  My orders
                 </Link>
               </>
             )}
@@ -99,13 +154,13 @@ const Navbar = () => {
             {user?.role === 'RESTAURANT_OWNER' && (
               <>
                 <Link to="/restaurant-home" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
-                  首页
+                  Home
                 </Link>
                 <Link to="/restaurant-management" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
-                  订单管理
+                  Orders
                 </Link>
                 <Link to="/menu-management" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
-                  菜品管理
+                  Menu
                 </Link>
               </>
             )}
@@ -113,13 +168,27 @@ const Navbar = () => {
             {user?.role === 'DRIVER' && (
               <>
                 <Link to="/driver-home" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
-                  首页
+                  Home
                 </Link>
                 <Link to="/driver-dashboard" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
-                  配送工作台
+                  Driver dashboard
                 </Link>
                 <Link to="/driver-deliveries" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
-                  我的配送
+                  My deliveries
+                </Link>
+              </>
+            )}
+
+            {user?.role === 'ADMIN' && (
+              <>
+                <Link to="/admin/tickets" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
+                  Ticket board
+                </Link>
+                <Link to="/admin/audit" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
+                  Audit logs
+                </Link>
+                <Link to="/admin/users" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
+                  Access management
                 </Link>
               </>
             )}
@@ -131,7 +200,7 @@ const Navbar = () => {
             <div className="hidden md:flex items-center">
               <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-gray-300'}`} />
               <span className="ml-2 text-xs text-gray-500">
-                {isConnected ? '已连接' : '未连接'}
+                {isConnected ? 'Connected' : 'Disconnected'}
               </span>
             </div>
 
@@ -171,10 +240,31 @@ const Navbar = () => {
                   {user?.firstName} {user?.lastName}
                 </span>
               </div>
+              {isAuthenticated && (
+                <span className="text-xs text-gray-400">
+                  Token: {tokenRemaining || '--'}
+                </span>
+              )}
+              {user?.role === 'ADMIN' && (
+                <button
+                  onClick={handleSessionCheck}
+                  className="p-2 text-gray-600 hover:text-primary-600 transition-colors"
+                  title="Check session"
+                >
+                  <ShieldCheck className="w-5 h-5" />
+                </button>
+              )}
+              <button
+                onClick={handleClearToken}
+                className="p-2 text-gray-600 hover:text-amber-600 transition-colors"
+                title="Clear token"
+              >
+                <Trash2 className="w-5 h-5" />
+              </button>
               <button
                 onClick={handleLogout}
                 className="p-2 text-gray-600 hover:text-red-600 transition-colors"
-                title="退出登录"
+                title="Sign out"
               >
                 <LogOut className="w-5 h-5" />
               </button>
@@ -200,21 +290,21 @@ const Navbar = () => {
                   className="block py-2 text-gray-700 hover:text-primary-600"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  首页
+                  Home
                 </Link>
                 <Link
                   to="/restaurants"
                   className="block py-2 text-gray-700 hover:text-primary-600"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  餐厅
+                  Restaurants
                 </Link>
                 <Link
                   to="/orders"
                   className="block py-2 text-gray-700 hover:text-primary-600"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  我的订单
+                  My orders
                 </Link>
               </>
             )}
@@ -226,21 +316,21 @@ const Navbar = () => {
                   className="block py-2 text-gray-700 hover:text-primary-600"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  首页
+                  Home
                 </Link>
                 <Link
                   to="/restaurant-management"
                   className="block py-2 text-gray-700 hover:text-primary-600"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  订单管理
+                  Orders
                 </Link>
                 <Link
                   to="/menu-management"
                   className="block py-2 text-gray-700 hover:text-primary-600"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  菜品管理
+                  Menu
                 </Link>
               </>
             )}
@@ -252,21 +342,47 @@ const Navbar = () => {
                   className="block py-2 text-gray-700 hover:text-primary-600"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  首页
+                  Home
                 </Link>
                 <Link
                   to="/driver-dashboard"
                   className="block py-2 text-gray-700 hover:text-primary-600"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  配送工作台
+                  Driver dashboard
                 </Link>
                 <Link
                   to="/driver-deliveries"
                   className="block py-2 text-gray-700 hover:text-primary-600"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  我的配送
+                  My deliveries
+                </Link>
+              </>
+            )}
+
+            {user?.role === 'ADMIN' && (
+              <>
+                <Link
+                  to="/admin/tickets"
+                  className="block py-2 text-gray-700 hover:text-primary-600"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Ticket board
+                </Link>
+                <Link
+                  to="/admin/audit"
+                  className="block py-2 text-gray-700 hover:text-primary-600"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Audit logs
+                </Link>
+                <Link
+                  to="/admin/users"
+                  className="block py-2 text-gray-700 hover:text-primary-600"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Access management
                 </Link>
               </>
             )}
@@ -282,7 +398,7 @@ const Navbar = () => {
                 className="flex items-center space-x-2 py-2 text-red-600"
               >
                 <LogOut className="w-5 h-5" />
-                <span>退出登录</span>
+                <span>Sign out</span>
               </button>
             </div>
           </div>

@@ -123,7 +123,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // 这些路径不需要 JWT 验证
         return path.startsWith("/api/auth/login") ||
                path.startsWith("/api/auth/register") ||
-               path.startsWith("/api/users") ||
                path.equals("/api/error") ||
                path.startsWith("/api/actuator/health") ||
                path.startsWith("/swagger-ui") ||

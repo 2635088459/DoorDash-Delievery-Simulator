@@ -2,7 +2,7 @@
 
 Full-stack food delivery platform with Spring Boot + React. Think DoorDash/Uber Eats but simpler.
 
-Started as practice, turned into something more complete. Three-sided marketplace with real-time updates.
+Three-sided marketplace with real-time updates, role-based portals, and an admin ticket center for anomaly review.
 
 ## System Architecture
 
@@ -50,16 +50,16 @@ Customer          Restaurant         Driver
 
 **Frontend:** React 18 | Vite | Zustand | Tailwind CSS
 
-**Deploy:** Docker Compose
+**Deploy:** Docker Compose (backend), static hosting for frontend
 
 ## Features by Role
 
-| Customer | Restaurant Owner | Driver |
+| Customer | Restaurant Owner | Driver | Admin |
 |----------|------------------|--------|
-| Browse restaurants | View orders | See available deliveries |
-| Shopping cart | Update order status | Update delivery status |
-| Place orders | Statistics dashboard | Earnings tracking |
-| Real-time notifications | Menu management* | Delivery history* |
+| Browse restaurants | View orders | See available deliveries | Ticket board & audit logs |
+| Shopping cart | Update order status | Update delivery status | Agent suggestions & evidence |
+| Place orders | Statistics dashboard | Earnings tracking | Action execution write-back |
+| Real-time notifications | Menu management* | Delivery history* | SLA monitoring |
 
 *In progress
 
@@ -97,6 +97,42 @@ Or register new account (choose role during signup).
 3. Login as **driver** (new window) → Pick up → Deliver
 
 Each action triggers real-time notifications across all users.
+
+## Frontend Deployment (Bluehost subpath)
+
+This project supports hosting the frontend under a subpath (e.g., `/livefood`).
+
+1) Build the frontend:
+
+```bash
+cd frontend
+npm run build
+```
+
+2) Upload `frontend/dist/` contents to `public_html/livefood/`.
+
+3) Ensure the SPA `.htaccess` file exists at `public_html/livefood/.htaccess`.
+
+4) If your main site has rewrite rules, add a bypass rule at the top of `public_html/.htaccess`:
+
+```
+RewriteRule ^livefood/ - [L]
+```
+
+### Backend API Base URL
+
+The frontend calls `/api/*` by default. For production hosting, set the API base URL:
+
+```bash
+export VITE_API_BASE_URL="https://YOUR-BACKEND-DOMAIN"
+npm run build
+```
+
+Or create `frontend/.env.production`:
+
+```
+VITE_API_BASE_URL=https://YOUR-BACKEND-DOMAIN
+```
 
 ## Project Structure
 
@@ -137,4 +173,4 @@ Work in progress. Code isn't perfect but it works. Feel free to use as reference
 
 ---
 
-**Last updated:** January 2026
+**Last updated:** March 2026

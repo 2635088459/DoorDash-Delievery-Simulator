@@ -21,9 +21,9 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   
   const roleOptions = [
-    { value: 'CUSTOMER', label: '👤 普通客户', description: '浏览餐厅，下单订餐' },
-    { value: 'RESTAURANT_OWNER', label: '🏪 餐厅老板', description: '管理餐厅，处理订单' },
-    { value: 'DRIVER', label: '🚗 配送骑手', description: '接单配送，赚取收入' }
+    { value: 'CUSTOMER', label: '👤 Customer', description: 'Browse restaurants and place orders' },
+    { value: 'RESTAURANT_OWNER', label: '🏪 Restaurant owner', description: 'Manage your restaurant and orders' },
+    { value: 'DRIVER', label: '🚗 Driver', description: 'Deliver orders and earn income' }
   ];
 
   const handleChange = (e) => {
@@ -37,7 +37,7 @@ const Register = () => {
     e.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
-      toast.error('两次输入的密码不一致');
+      toast.error('Passwords do not match');
       return;
     }
 
@@ -46,9 +46,9 @@ const Register = () => {
     try {
       const { confirmPassword, ...registerData } = formData;
       const response = await authService.register(registerData);
-      login(response.user, response.accessToken);
+  login(response.user, response.accessToken, response.refreshToken);
       
-      toast.success(`注册成功！欢迎加入 DoorDash`);
+  toast.success('Registration successful! Welcome to DoorDash');
       
       // 根据角色跳转到不同页面
       if (response.user.role === 'RESTAURANT_OWNER') {
@@ -60,7 +60,7 @@ const Register = () => {
       }
     } catch (error) {
       console.error('Register error:', error);
-      toast.error(error.response?.data?.message || '注册失败，请稍后重试');
+      toast.error(error.response?.data?.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -75,10 +75,10 @@ const Register = () => {
             <ShoppingBag className="w-10 h-10 text-white" />
           </div>
           <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            创建账户
+            Create account
           </h2>
           <p className="text-gray-600">
-            加入 DoorDash，开始您的美食之旅
+            Join DoorDash and start your food journey
           </p>
         </div>
 
@@ -88,7 +88,7 @@ const Register = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
-                  名字
+                  First name
                 </label>
                 <input
                   id="firstName"
@@ -96,7 +96,7 @@ const Register = () => {
                   type="text"
                   required
                   className="input"
-                  placeholder="张"
+                  placeholder="Jane"
                   value={formData.firstName}
                   onChange={handleChange}
                 />
@@ -104,7 +104,7 @@ const Register = () => {
 
               <div>
                 <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
-                  姓氏
+                  Last name
                 </label>
                 <input
                   id="lastName"
@@ -112,7 +112,7 @@ const Register = () => {
                   type="text"
                   required
                   className="input"
-                  placeholder="三"
+                  placeholder="Doe"
                   value={formData.lastName}
                   onChange={handleChange}
                 />
@@ -121,7 +121,7 @@ const Register = () => {
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                邮箱地址
+                Email address
               </label>
               <input
                 id="email"
@@ -137,7 +137,7 @@ const Register = () => {
 
             <div>
               <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                手机号码
+                Phone number
               </label>
               <input
                 id="phone"
@@ -154,7 +154,7 @@ const Register = () => {
             {/* 角色选择 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">
-                选择账户类型
+                Choose account type
               </label>
               <div className="space-y-3">
                 {roleOptions.map((option) => (
@@ -189,7 +189,7 @@ const Register = () => {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                密码
+                Password
               </label>
               <input
                 id="password"
@@ -205,7 +205,7 @@ const Register = () => {
 
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                确认密码
+                Confirm password
               </label>
               <input
                 id="confirmPassword"
@@ -224,15 +224,15 @@ const Register = () => {
               disabled={loading}
               className="w-full btn btn-primary"
             >
-              {loading ? '注册中...' : '注册'}
+              {loading ? 'Creating...' : 'Create account'}
             </button>
           </form>
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
-              已有账户？{' '}
+              Already have an account?{' '}
               <Link to="/login" className="font-medium text-primary-600 hover:text-primary-500">
-                立即登录
+                Sign in
               </Link>
             </p>
           </div>

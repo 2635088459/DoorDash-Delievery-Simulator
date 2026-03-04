@@ -3,14 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { orderService, restaurantService } from '../services/apiService';
 
 const statusMap = {
-  PENDING: { label: '待确认', color: 'bg-yellow-100 text-yellow-800', next: 'CONFIRMED' },
-  CONFIRMED: { label: '已确认', color: 'bg-blue-100 text-blue-800', next: 'PREPARING' },
-  PREPARING: { label: '制作中', color: 'bg-purple-100 text-purple-800', next: 'READY_FOR_PICKUP' },
-  READY_FOR_PICKUP: { label: '待取餐', color: 'bg-orange-100 text-orange-800', next: 'PICKED_UP' },
-  PICKED_UP: { label: '配送中', color: 'bg-indigo-100 text-indigo-800', next: 'IN_TRANSIT' },
-  IN_TRANSIT: { label: '运输中', color: 'bg-cyan-100 text-cyan-800', next: 'DELIVERED' },
-  DELIVERED: { label: '已送达', color: 'bg-green-100 text-green-800', next: null },
-  CANCELLED: { label: '已取消', color: 'bg-red-100 text-red-800', next: null }
+  PENDING: { label: 'Pending confirmation', color: 'bg-yellow-100 text-yellow-800', next: 'CONFIRMED' },
+  CONFIRMED: { label: 'Confirmed', color: 'bg-blue-100 text-blue-800', next: 'PREPARING' },
+  PREPARING: { label: 'Preparing', color: 'bg-purple-100 text-purple-800', next: 'READY_FOR_PICKUP' },
+  READY_FOR_PICKUP: { label: 'Ready for pickup', color: 'bg-orange-100 text-orange-800', next: 'PICKED_UP' },
+  PICKED_UP: { label: 'Out for delivery', color: 'bg-indigo-100 text-indigo-800', next: 'IN_TRANSIT' },
+  IN_TRANSIT: { label: 'In transit', color: 'bg-cyan-100 text-cyan-800', next: 'DELIVERED' },
+  DELIVERED: { label: 'Delivered', color: 'bg-green-100 text-green-800', next: null },
+  CANCELLED: { label: 'Cancelled', color: 'bg-red-100 text-red-800', next: null }
 };
 
 const RestaurantManagement = () => {
@@ -31,7 +31,7 @@ const RestaurantManagement = () => {
 
     // 检查是否是餐厅老板
     if (user.role !== 'RESTAURANT_OWNER') {
-      setError('您没有权限访问此页面。此页面仅供餐厅老板使用。');
+      setError('You do not have permission to access this page. This page is for restaurant owners only.');
       setLoading(false);
       return;
     }
@@ -44,14 +44,14 @@ const RestaurantManagement = () => {
     try {
       setLoading(true);
 
-      // 获取餐厅信息
+  // 获取餐厅信息
       const restaurantData = await restaurantService.getOwnerRestaurant();
       setRestaurantInfo(restaurantData);
 
-      // 获取餐厅订单
+  // 获取餐厅订单
       const ordersResponse = await orderService.getRestaurantOrders(restaurantData.id);
       
-      // 按状态和创建时间排序
+  // 按状态和创建时间排序
       const sortedOrders = (ordersResponse || []).sort((a, b) => {
         const statusPriority = {
           PENDING: 1,
@@ -79,20 +79,20 @@ const RestaurantManagement = () => {
       
       if (err.response?.status === 403) {
         if (user.role === 'RESTAURANT_OWNER') {
-          setError('登录已过期，请重新登录');
+          setError('Session expired. Please log in again.');
           localStorage.removeItem('token');
           localStorage.removeItem('user');
           navigate('/login');
           return;
         }
-        setError('您没有权限访问此页面。请确保使用餐厅老板账号登录。');
+        setError('You do not have permission to access this page. Please log in as a restaurant owner.');
       } else if (err.response?.status === 401) {
-        setError('登录已过期，请重新登录');
+        setError('Session expired. Please log in again.');
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         navigate('/login');
       } else {
-        setError(err.response?.data?.message || '获取订单列表失败');
+        setError(err.response?.data?.message || 'Failed to load orders');
       }
     } finally {
       setLoading(false);
@@ -106,17 +106,17 @@ const RestaurantManagement = () => {
       // 刷新订单列表
       await fetchRestaurantOrders();
       
-      alert(`订单状态已更新为：${statusMap[newStatus].label}`);
+      alert(`Order status updated to: ${statusMap[newStatus].label}`);
     } catch (err) {
       console.error('Failed to update order status:', err);
-      alert(err.response?.data?.message || '更新订单状态失败');
+      alert(err.response?.data?.message || 'Failed to update order status');
     }
   };
 
   const formatDate = (dateString) => {
     if (!dateString) return '-';
     const date = new Date(dateString);
-    return date.toLocaleString('zh-CN', {
+    return date.toLocaleString('en-US', {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
@@ -142,7 +142,7 @@ const RestaurantManagement = () => {
             onClick={() => navigate('/')}
             className="mt-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
           >
-            返回首页
+            Back to home
           </button>
         </div>
       </div>
@@ -160,7 +160,7 @@ const RestaurantManagement = () => {
               <p className="text-gray-600 mt-1">{restaurantInfo.cuisine} • {restaurantInfo.address}</p>
             </div>
             <div className="text-right">
-              <div className="text-sm text-gray-500">餐厅 ID</div>
+              <div className="text-sm text-gray-500">Restaurant ID</div>
               <div className="text-lg font-semibold text-gray-900">#{restaurantInfo.id}</div>
             </div>
           </div>
@@ -170,25 +170,25 @@ const RestaurantManagement = () => {
       {/* 订单统计 */}
       <div className="grid grid-cols-4 gap-4 mb-6">
         <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
-          <div className="text-yellow-800 text-sm font-medium">待确认</div>
+          <div className="text-yellow-800 text-sm font-medium">Pending</div>
           <div className="text-2xl font-bold text-yellow-900 mt-1">
             {orders.filter(o => o.status === 'PENDING').length}
           </div>
         </div>
         <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-          <div className="text-blue-800 text-sm font-medium">制作中</div>
+          <div className="text-blue-800 text-sm font-medium">Preparing</div>
           <div className="text-2xl font-bold text-blue-900 mt-1">
             {orders.filter(o => ['CONFIRMED', 'PREPARING'].includes(o.status)).length}
           </div>
         </div>
         <div className="bg-orange-50 rounded-lg p-4 border border-orange-200">
-          <div className="text-orange-800 text-sm font-medium">待取餐</div>
+          <div className="text-orange-800 text-sm font-medium">Ready for pickup</div>
           <div className="text-2xl font-bold text-orange-900 mt-1">
             {orders.filter(o => o.status === 'READY_FOR_PICKUP').length}
           </div>
         </div>
         <div className="bg-green-50 rounded-lg p-4 border border-green-200">
-          <div className="text-green-800 text-sm font-medium">今日已完成</div>
+          <div className="text-green-800 text-sm font-medium">Completed today</div>
           <div className="text-2xl font-bold text-green-900 mt-1">
             {orders.filter(o => {
               const today = new Date().toDateString();
@@ -202,15 +202,15 @@ const RestaurantManagement = () => {
       {/* 订单列表 */}
       <div className="bg-white rounded-lg shadow-md">
         <div className="p-6 border-b border-gray-200">
-          <h2 className="text-xl font-bold text-gray-900">订单管理</h2>
-          <p className="text-gray-600 text-sm mt-1">管理您的餐厅订单状态</p>
+          <h2 className="text-xl font-bold text-gray-900">Order management</h2>
+          <p className="text-gray-600 text-sm mt-1">Manage your restaurant order status</p>
         </div>
 
         {orders.length === 0 ? (
           <div className="p-12 text-center">
             <div className="text-gray-400 text-6xl mb-4">📋</div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">暂无订单</h3>
-            <p className="text-gray-600">您的餐厅还没有收到任何订单</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No orders yet</h3>
+            <p className="text-gray-600">Your restaurant hasn't received any orders yet</p>
           </div>
         ) : (
           <div className="divide-y divide-gray-200">
@@ -221,7 +221,7 @@ const RestaurantManagement = () => {
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="text-lg font-semibold text-gray-900">
-                        订单 #{order.orderNumber}
+                        Order #{order.orderNumber}
                       </h3>
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusMap[order.status]?.color || 'bg-gray-100 text-gray-800'}`}>
                         {statusMap[order.status]?.label || order.status}
@@ -230,26 +230,26 @@ const RestaurantManagement = () => {
 
                     <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-3">
                       <div>
-                        <span className="font-medium">客户：</span>
+                        <span className="font-medium">Customer:</span>
                         {order.customerName} ({order.customerEmail})
                       </div>
                       <div>
-                        <span className="font-medium">下单时间：</span>
+                        <span className="font-medium">Placed at:</span>
                         {formatDate(order.createdAt)}
                       </div>
                       <div>
-                        <span className="font-medium">配送地址：</span>
+                        <span className="font-medium">Delivery address:</span>
                         {order.deliveryAddressStreet}, {order.deliveryAddressCity}
                       </div>
                       <div>
-                        <span className="font-medium">订单金额：</span>
+                        <span className="font-medium">Order total:</span>
                         <span className="text-red-600 font-semibold">¥{order.totalAmount}</span>
                       </div>
                     </div>
 
                     {/* 订单商品 */}
                     <div className="bg-gray-50 rounded-lg p-3 mb-3">
-                      <div className="text-xs text-gray-500 mb-2">订单内容：</div>
+                      <div className="text-xs text-gray-500 mb-2">Order items:</div>
                       {order.items?.map((item, idx) => (
                         <div key={idx} className="text-sm text-gray-700">
                           {item.menuItemName} x {item.quantity} = ¥{item.subtotal}
@@ -259,7 +259,7 @@ const RestaurantManagement = () => {
 
                     {order.specialInstructions && (
                       <div className="bg-yellow-50 border border-yellow-200 rounded p-2 text-sm text-yellow-800">
-                        <span className="font-medium">备注：</span>
+                        <span className="font-medium">Notes:</span>
                         {order.specialInstructions}
                       </div>
                     )}
@@ -272,10 +272,10 @@ const RestaurantManagement = () => {
                         onClick={() => updateOrderStatus(order.id, statusMap[order.status].next)}
                         className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors font-medium text-sm whitespace-nowrap"
                       >
-                        {order.status === 'PENDING' && '确认订单 →'}
-                        {order.status === 'CONFIRMED' && '开始制作 →'}
-                        {order.status === 'PREPARING' && '制作完成 →'}
-                        {order.status === 'READY_FOR_PICKUP' && '骑手已取餐 →'}
+                        {order.status === 'PENDING' && 'Confirm order →'}
+                        {order.status === 'CONFIRMED' && 'Start preparing →'}
+                        {order.status === 'PREPARING' && 'Finish preparation →'}
+                        {order.status === 'READY_FOR_PICKUP' && 'Driver picked up →'}
                       </button>
                     )}
                     
@@ -283,19 +283,19 @@ const RestaurantManagement = () => {
                       onClick={() => navigate(`/orders/${order.id}`)}
                       className="bg-white text-gray-700 px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors text-sm"
                     >
-                      查看详情
+                      View details
                     </button>
 
                     {order.status === 'PENDING' && (
                       <button
                         onClick={() => {
-                          if (confirm('确定要取消这个订单吗？')) {
+                          if (confirm('Are you sure you want to cancel this order?')) {
                             updateOrderStatus(order.id, 'CANCELLED');
                           }
                         }}
                         className="bg-white text-red-600 px-4 py-2 rounded-lg border border-red-300 hover:bg-red-50 transition-colors text-sm"
                       >
-                        取消订单
+                        Cancel order
                       </button>
                     )}
                   </div>

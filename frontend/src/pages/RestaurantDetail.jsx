@@ -38,7 +38,7 @@ const RestaurantDetail = () => {
       setMenuItems(menuData);
     } catch (error) {
       console.error('Failed to load restaurant details:', error);
-      toast.error('加载餐厅信息失败');
+      toast.error('Failed to load restaurant details');
       navigate('/restaurants');
     } finally {
       setLoading(false);
@@ -48,13 +48,13 @@ const RestaurantDetail = () => {
   const handleAddToCart = (item) => {
     // 检查是否来自不同餐厅
     if (cartRestaurantId && cartRestaurantId !== parseInt(id)) {
-      if (window.confirm(`购物车中有来自其他餐厅的商品，是否清空购物车并添加新商品？`)) {
+      if (window.confirm('Your cart has items from another restaurant. Clear it and add this item?')) {
         addItem(item, parseInt(id), restaurant.name);
-        toast.success(`已添加 ${item.name} 到购物车`);
+        toast.success(`Added ${item.name} to cart`);
       }
     } else {
       addItem(item, parseInt(id), restaurant.name);
-      toast.success(`已添加 ${item.name} 到购物车`);
+      toast.success(`Added ${item.name} to cart`);
     }
   };
 
@@ -71,7 +71,7 @@ const RestaurantDetail = () => {
       <div className="flex justify-center items-center h-screen">
         <div className="text-center">
           <Store className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-600">餐厅不存在</p>
+          <p className="text-gray-600">Restaurant not found</p>
         </div>
       </div>
     );
@@ -87,7 +87,7 @@ const RestaurantDetail = () => {
             className="flex items-center text-gray-600 hover:text-gray-900 mb-4"
           >
             <ArrowLeft className="w-5 h-5 mr-2" />
-            返回餐厅列表
+            Back to restaurants
           </button>
         </div>
       </div>
@@ -108,14 +108,14 @@ const RestaurantDetail = () => {
               <div className="flex items-center space-x-4 text-sm text-gray-700 mb-3">
                 <div className="flex items-center">
                   <Star className="w-4 h-4 text-yellow-400 fill-current mr-1" />
-                  <span className="font-medium">{restaurant.rating?.toFixed(1) || '暂无评分'}</span>
+                  <span className="font-medium">{restaurant.rating?.toFixed(1) || 'No rating yet'}</span>
                 </div>
                 <span>•</span>
-                <span>{restaurant.cuisineType || '其他'}</span>
+                <span>{restaurant.cuisineType || 'Other'}</span>
                 <span>•</span>
                 <div className="flex items-center">
                   <Clock className="w-4 h-4 mr-1" />
-                  <span>{restaurant.estimatedDeliveryTime || '30-40'} 分钟</span>
+                  <span>{restaurant.estimatedDeliveryTime || '30-40'} min</span>
                 </div>
               </div>
               {restaurant.address && (
@@ -125,11 +125,11 @@ const RestaurantDetail = () => {
                 </div>
               )}
               <div className="text-sm text-gray-600">
-                起送金额：¥{restaurant.minimumOrderAmount?.toFixed(2) || '0.00'}
+                Minimum order: ¥{restaurant.minimumOrderAmount?.toFixed(2) || '0.00'}
               </div>
               {!restaurant.isActive && (
                 <div className="mt-3 inline-block px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium">
-                  已打烊
+                  Closed
                 </div>
               )}
             </div>
@@ -139,12 +139,12 @@ const RestaurantDetail = () => {
 
       {/* Menu Items */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">菜单</h2>
+  <h2 className="text-2xl font-bold text-gray-900 mb-6">Menu</h2>
 
         {menuItems.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-xl">
             <Store className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600">该餐厅暂无菜品</p>
+            <p className="text-gray-600">This restaurant has no menu items yet</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -169,7 +169,7 @@ const RestaurantDetail = () => {
                           ¥{item.price.toFixed(2)}
                         </span>
                         {!item.isAvailable && (
-                          <span className="text-sm text-red-500">暂时售罄</span>
+                          <span className="text-sm text-red-500">Sold out</span>
                         )}
                       </div>
                     </div>
@@ -197,7 +197,7 @@ const RestaurantDetail = () => {
                         className="w-full bg-primary-600 text-white py-2 rounded-lg font-medium hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
                       >
                         <Plus className="w-4 h-4 mr-2" />
-                        添加到购物车
+                        Add to cart
                       </button>
                     ) : (
                       <div className="flex items-center justify-between bg-primary-50 rounded-lg p-2">
@@ -237,10 +237,10 @@ const RestaurantDetail = () => {
                 </div>
                 <div>
                   <div className="font-bold text-gray-900">
-                    {getTotalItems()} 件商品
+                    {getTotalItems()} items
                   </div>
                   <div className="text-sm text-gray-600">
-                    总计：¥{getTotalPrice().toFixed(2)}
+                    Total: ¥{getTotalPrice().toFixed(2)}
                   </div>
                 </div>
               </div>
@@ -248,7 +248,7 @@ const RestaurantDetail = () => {
                 onClick={() => navigate('/cart')}
                 className="bg-primary-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-primary-700 transition-colors"
               >
-                查看购物车
+                View cart
               </button>
             </div>
           </div>

@@ -20,7 +20,7 @@ const Orders = () => {
       setOrders(data);
     } catch (error) {
       console.error('Failed to load orders:', error);
-      toast.error('加载订单失败');
+      toast.error('Failed to load orders');
     } finally {
       setLoading(false);
     }
@@ -41,13 +41,13 @@ const Orders = () => {
 
   const getStatusText = (status) => {
     const texts = {
-      PENDING: '等待确认',
-      CONFIRMED: '已确认',
-      PREPARING: '准备中',
-      READY: '待配送',
-      DELIVERING: '配送中',
-      DELIVERED: '已送达',
-      CANCELLED: '已取消',
+      PENDING: 'Pending confirmation',
+      CONFIRMED: 'Confirmed',
+      PREPARING: 'Preparing',
+      READY: 'Ready for pickup',
+      DELIVERING: 'Out for delivery',
+      DELIVERED: 'Delivered',
+      CANCELLED: 'Cancelled',
     };
     return texts[status] || status;
   };
@@ -58,9 +58,9 @@ const Orders = () => {
       <div className="flex items-center space-x-3 mb-8">
         <ShoppingBag className="w-8 h-8 text-primary-600" />
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">我的订单</h1>
+          <h1 className="text-3xl font-bold text-gray-900">My orders</h1>
           <p className="text-sm text-gray-600 mt-1">
-            查看您的订单历史和状态
+            View your order history and status
           </p>
         </div>
       </div>
@@ -76,9 +76,9 @@ const Orders = () => {
           {orders.length === 0 ? (
             <div className="text-center py-12">
               <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500 text-lg">暂无订单</p>
+              <p className="text-gray-500 text-lg">No orders yet</p>
               <p className="text-gray-400 text-sm mt-2">
-                开始点餐，订单将在这里显示
+                Start ordering and your orders will show up here
               </p>
             </div>
           ) : (
@@ -95,7 +95,7 @@ const Orders = () => {
                     {order.restaurantName}
                   </h3>
                   <p className="text-sm text-gray-500">
-                    订单号: {order.orderNumber}
+                    Order #{order.orderNumber}
                   </p>
                 </div>
                 <span className={`badge ${getStatusBadge(order.status)}`}>
@@ -105,11 +105,11 @@ const Orders = () => {
 
               <div className="flex items-center justify-between text-sm">
                 <div className="text-gray-600">
-                  {order.items?.length || 0} 件商品
+                  {order.items?.length || 0} items
                 </div>
                 <div className="flex items-center space-x-4">
                   <span className="text-gray-600">
-                    {new Date(order.createdAt).toLocaleString('zh-CN')}
+                    {new Date(order.createdAt).toLocaleString('en-US')}
                   </span>
                   <span className="text-lg font-bold text-primary-600">
                     ¥{order.totalAmount?.toFixed(2) || '0.00'}
@@ -125,18 +125,18 @@ const Orders = () => {
                   }}
                   className="btn btn-outline text-sm"
                 >
-                  查看详情
+                  View details
                 </button>
                 {order.status === 'PENDING' && (
                   <button 
                     onClick={(e) => {
                       e.stopPropagation();
                       // TODO: 实现取消订单功能
-                      toast.error('取消订单功能开发中');
+                      toast.error('Cancel order is under development');
                     }}
                     className="btn btn-secondary text-sm"
                   >
-                    取消订单
+                    Cancel order
                   </button>
                 )}
               </div>
@@ -150,9 +150,9 @@ const Orders = () => {
       {/* Info */}
       <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
         <div className="text-sm text-blue-800">
-          <p className="font-medium mb-1">💡 提示</p>
+          <p className="font-medium mb-1">💡 Tip</p>
           <p className="text-blue-700">
-            订单状态会实时更新，您也会收到通知提醒。点击订单可查看详细信息和配送进度。
+            Order status updates in real time, and you'll receive notifications. Click an order to view details and delivery progress.
           </p>
         </div>
       </div>

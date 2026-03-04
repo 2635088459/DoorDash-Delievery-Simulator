@@ -1,0 +1,6 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule ^livefood/ - [L]
+
+  # Keep your existing root rewrite rules below this line.
+</IfModule>

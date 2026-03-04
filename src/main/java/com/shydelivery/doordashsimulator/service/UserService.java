@@ -3,6 +3,7 @@ package com.shydelivery.doordashsimulator.service;
 import com.shydelivery.doordashsimulator.dto.UserDTO;
 import com.shydelivery.doordashsimulator.dto.request.CreateUserRequest;
 import com.shydelivery.doordashsimulator.dto.request.UpdateUserRequest;
+import com.shydelivery.doordashsimulator.dto.request.UpdateUserRoleRequest;
 import com.shydelivery.doordashsimulator.entity.User;
 import com.shydelivery.doordashsimulator.entity.User.UserRole;
 import com.shydelivery.doordashsimulator.exception.BusinessException;
@@ -250,6 +251,39 @@ public class UserService {
         
         log.info("User status toggled successfully for ID: {}", id);
         
+        return UserDTO.from(updatedUser);
+    }
+
+    /**
+     * 更新用户角色（仅管理员）
+     *
+     * @param id 用户ID
+     * @param request 角色更新请求
+     * @return UserDTO
+     */
+    public UserDTO updateUserRole(Long id, UpdateUserRoleRequest request) {
+        log.info("Updating user role for ID: {}", id);
+
+        User user = userRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
+
+        UserRole targetRole = request.getRole();
+        if (targetRole == null) {
+            throw new BusinessException("角色不能为空");
+        }
+
+        if (user.getRole() == UserRole.ADMIN && targetRole != UserRole.ADMIN) {
+            long adminCount = userRepository.countByRole(UserRole.ADMIN);
+            if (adminCount <= 1) {
+                throw new BusinessException("至少保留一个管理员账号");
+            }
+        }
+
+        user.setRole(targetRole);
+        User updatedUser = userRepository.save(user);
+
+        log.info("User role updated successfully for ID: {}", updatedUser.getId());
+
         return UserDTO.from(updatedUser);
     }
     

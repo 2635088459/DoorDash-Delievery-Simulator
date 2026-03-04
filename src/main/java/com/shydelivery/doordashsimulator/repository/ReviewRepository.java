@@ -53,6 +53,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
      * @return 餐厅的所有评价列表
      */
     List<Review> findByRestaurantIdOrderByCreatedAtDesc(Long restaurantId);
+
+    List<Review> findTop5ByRestaurantIdOrderByCreatedAtDesc(Long restaurantId);
     
     /**
      * 查找餐厅的正面评价（评分 >= 4.0）
